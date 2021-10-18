@@ -1,1 +1,3 @@
-# vscode-package-logger-extension
+# WinPkgLog
+
+TODO ドキュメント作成

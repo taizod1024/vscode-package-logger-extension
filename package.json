@@ -1,0 +1,74 @@
+{
+  "version": "0.0.0",
+  "name": "package-logger",
+  "displayName": "Package Logger",
+  "description": "windows package logger",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "publisher": "taizod1024",
+  "main": "./build/main.js",
+  "browser": "./build/main.js",
+  "activationEvents": [
+    "*"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "package-logger.toggleDebug",
+        "title": "Package Logger: Toggle Debug"
+      }
+    ],
+    "keybindings": []
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=build/main.js --format=cjs --platform=node --external:vscode",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test": "node ./build/test/runTest.js",
+    "release": "npm run release-step1 && npm run release-step2",
+    "release-step1": "npm run clean && git switch main && git merge --no-ff develop",
+    "release-step2": "npx standard-version && vsce publish && git push --follow-tags origin main && git push origin develop && git switch develop",
+    "package": "vsce package",
+    "clean": "rmdir /q /s .\\build"
+  },
+  "author": "yamamoto.taizo <taizod1024@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@commitlint/cli": "^13.2.1",
+    "@commitlint/config-conventional": "^13.2.0",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.11.1",
+    "@types/superagent": "^4.1.13",
+    "@types/superagent-proxy": "^2.0.1",
+    "@types/vscode": "^1.61.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "bufferutil": "^4.0.5",
+    "esbuild": "^0.13.8",
+    "eslint": "^8.0.1",
+    "generator-code": "^1.6.2",
+    "husky": "^4.3.8",
+    "mocha": "^9.1.3",
+    "standard-version": "^9.3.2",
+    "ts-node": "^10.3.0",
+    "typescript": "^4.4.4",
+    "utf-8-validate": "^5.0.7",
+    "vscode": "^0.9.9",
+    "vscode-test": "^1.6.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taizod1024/vscode-package-logger-extension.git"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "./bin/check_no_main_branch.sh",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
+}
