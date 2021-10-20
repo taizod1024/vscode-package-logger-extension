@@ -20,6 +20,10 @@
       {
         "command": "package-logger.toggleDebug",
         "title": "Package Logger: Toggle Debug"
+      },
+      {
+        "command": "package-logger.logPackage",
+        "title": "Package Logger: Log Package"
       }
     ],
     "keybindings": []
@@ -70,5 +74,8 @@
       "pre-commit": "./bin/check_no_main_branch.sh",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "dependencies": {
+    "child_process": "^1.0.2"
   }
 }

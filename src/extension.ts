@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { packagelogger } from './packagelogger';
+import { packagelogger } from './PackageLogger';
 
 // extension entrypoint
 export function activate(context: vscode.ExtensionContext) {
