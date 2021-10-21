@@ -3,11 +3,6 @@ import { packagelogger } from './PackageLogger';
 
 // extension entrypoint
 export function activate(context: vscode.ExtensionContext) {
-    try {
-        packagelogger.activate(context);
-    }
-    catch (ex) {
-        packagelogger.channel.appendLine("**** " + ex + " ****");
-    }
+    packagelogger.activate(context);
 }
 export function deactivate() { }

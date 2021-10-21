@@ -17,6 +17,9 @@ class PackageLogger {
   /** project path */
   public projectpath: string;
 
+  /** app path */
+  public apppath: string;
+
   /** computer name h*/
   public computername: string;
 
@@ -45,12 +48,22 @@ class PackageLogger {
     // init vscode
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.toggleDebug`, () => {
-        this.toggleDebug();
+        try {
+          this.toggleDebug();
+        }
+        catch (ex) {
+          packagelogger.channel.appendLine("**** " + ex + " ****");
+        }
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.logPackage`, () => {
-        this.logPackage();
+        try {
+          this.logPackage();
+        }
+        catch (ex) {
+          packagelogger.channel.appendLine("**** " + ex + " ****");
+        }
       })
     );
   }
@@ -78,44 +91,67 @@ class PackageLogger {
 
     // computername
     this.computername = process.env.computername;
-    if (vscode.workspace.workspaceFolders?.length !== 1) {
+    if (this.computername === null) {
       throw `ERROR: environment variable COMPUTERNAME missing`;
     }
     this.channel.appendLine(`[${this.timestamp()}] - computername: ${this.computername}`);
-    this.computernamepath = `${this.projectpath}\\${this.computername}`;
-    if (!fs.existsSync(this.computernamepath)) {
-      fs.mkdirSync(this.computernamepath);
-      this.channel.appendLine(`[${this.timestamp()}]   -> ${this.computernamepath}`);
-    }
 
-    // package
-    this.packagexpath = `${this.computernamepath}\\package`;
-    if (!fs.existsSync(this.packagexpath)) {
-      fs.mkdirSync(this.packagexpath);
-      this.channel.appendLine(`[${this.timestamp()}]   -> ${this.packagexpath}`);
-    }
-
-    // os
-    this.osxpath = `${this.computernamepath}\\os`;
-    if (!fs.existsSync(this.osxpath)) {
-      fs.mkdirSync(this.osxpath);
-      this.channel.appendLine(`[${this.timestamp()}]   -> ${this.osxpath}`);
-    }
-
+    // log os and package
+    // TODO get windows features
+    // TODO get winget
+    // TODO get scoop
     let machine: any = { os: {}, package: {} };
-
     this.logSysteminfo(machine);
     this.logEnv(machine);
-    this.logFeatures(machine);
     this.logService(machine);
-    this.logWinget(machine);
+    // this.logWinget(machine);
     this.logNodejs(machine);
     this.logChocolatey(machine);
     this.logPython(machine);
     this.logVscode(machine);
+    this.logApp(machine);
     console.log(machine);
 
+    // output log
+    this.outputLog(machine);
+
     this.channel.appendLine(`[${this.timestamp()}] done.`);
+  }
+
+  //** output log */
+  public outputLog(machine: any) {
+
+    // check apppath
+    this.apppath = `${this.projectpath}\\${this.appid}`;
+    if (!fs.existsSync(this.apppath)) {
+      fs.mkdirSync(this.apppath);
+    }
+
+    // check computernamepath
+    this.computernamepath = `${this.apppath}\\${this.computername}`;
+    // if (!fs.existsSync(this.computernamepath)) {
+    //   fs.mkdirSync(this.computernamepath);
+    //   this.channel.appendLine(`[${this.timestamp()}]   -> ${this.computernamepath}`);
+    // }
+
+    // 
+    let oldpath = `${this.computernamepath}_old`;
+    let newpath = `${this.computernamepath}_new`;
+    if (fs.existsSync(newpath)) {
+      fs.rmSync(newpath, { recursive: true, force: true });
+    }
+    fs.mkdirSync(newpath, { recursive: true });
+
+    // output log
+    for (const cat1 in machine) {
+      fs.mkdirSync(`${newpath}\\${cat1}`);
+      for (const cat2 in machine[cat1]) {
+        fs.mkdirSync(`${newpath}\\${cat1}\\${cat2}`);
+        for (const cat3 in machine[cat1][cat2]) {
+          fs.writeFileSync(`${newpath}\\${cat1}\\${cat2}\\${cat3}`, machine[cat1][cat2][cat3]);
+        }
+      }
+    }
   }
 
   /** log systeminfo */
@@ -134,19 +170,13 @@ class PackageLogger {
       "Virtual Memory: In Use:"
     ];
     let lines = text.split(/[\r\n]+/);
-    let out = "";
+    let content = "";
     for (const line of lines) {
       if (excludes.some(val => line.startsWith(val))) continue;
-      out += line + "\r\n";
+      content += line + "\r\n";
     }
-
-    machine.systeminfo = out;
-  }
-
-  /** log windows features */
-  public logFeatures(machine: any) {
-
-    // TODO windows features
+    machine.os.system = {};
+    machine.os.system.systeminfo = content;
   }
 
   /** log env */
@@ -163,10 +193,15 @@ class PackageLogger {
     machine.os.env = {};
     for (const envname in process.env) {
       if (excludes.some(val => envname.startsWith(val))) continue;
-      machine.os.env[envname] = process.env[envname].replace(/;/g, ";\r\n") || "";
+      let name = envname;
+      let content = `${envname} = ` + process.env[envname].replace(/;/g, "\r\n") || "";
+      machine.os.env[name] = content;
     }
   }
 
+  // TODO executing flag
+  // TODO / : \ * ? < > | "
+  
   /** log service */
   public logService(machine: any) {
 
@@ -189,26 +224,67 @@ class PackageLogger {
       }
     }
   }
-  /** log winget */
-  public logWinget(machine: any) {
 
-    // TODO too long name
-    
-    let cmd = "winget list";
-    let text = this.execCommand(cmd);
+  // /** log winget */
+  // public logWinget(machine: any) {
+
+  //   // TODO too long name
+
+  //   let cmd = "winget list";
+  //   let text = this.execCommand(cmd);
+  //   if (!text) { return; }
+
+  //   this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
+
+  //   machine.package.winget = {};
+  //   let lines = text.split(/[\r\n]+/);
+  //   lines.shift(); // delete first line
+  //   for (const line of lines) {
+  //     let word = line.split(/[ @]/).slice(1); // delete first word
+  //     let name = word[0]; // get name
+  //     let content = word.join(" "); // get content
+  //     if (name && content) {
+  //       machine.package.winget[name] = content;
+  //     }
+  //   }
+  // }
+
+  /** log winget */
+  public logApp(machine: any) {
+
+    let cmd1 = `reg query "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall" /s`;
+    let cmd2 = `reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" /s`;
+    let cmd3 = `reg query "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" /s`;
+    let text = "";
+    text += this.execCommand(`chcp 65001 1>NUL && ${cmd1}`) || "";
+    text += this.execCommand(`chcp 65001 1>NUL && ${cmd2}`) || "";
+    text += this.execCommand(`chcp 65001 1>NUL && ${cmd3}`) || "";
     if (!text) { return; }
 
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
+    this.channel.appendLine(`[${this.timestamp()}] - ${cmd1}`);
+    this.channel.appendLine(`[${this.timestamp()}] - ${cmd2}`);
+    this.channel.appendLine(`[${this.timestamp()}] - ${cmd3}`);
 
-    machine.package.winget = {};
+    machine.package.app = {};
     let lines = text.split(/[\r\n]+/);
     lines.shift(); // delete first line
+
+    let displayname = null;
+    let displayversion = null;
     for (const line of lines) {
-      let word = line.split(/[ @]/).slice(1); // delete first word
-      let name = word[0]; // get name
-      let content = word.join(" "); // get content
-      if (name && content) {
-        machine.package.winget[name] = content;
+
+      let word = line.trim().split(/ +/);
+      if (word[0] === "DisplayName") displayname = word.slice(2).join(" ");
+      if (word[0] === "DisplayVersion") displayversion = word[2];
+
+      if (displayname && displayversion) {
+
+        let name = `${displayname}@${displayversion}`; // get name
+        let content = name; // get content
+        machine.package.app[name] = content;
+
+        displayname = null;
+        displayversion = null;
       }
     }
   }
@@ -315,7 +391,6 @@ class PackageLogger {
     }
     return text;
   }
-
 
   /** set debug */
   public setDebug(debug: boolean, force = false) {
