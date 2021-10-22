@@ -151,6 +151,50 @@ class PackageLogger {
         reject(reason);
 
       });
+
+      // timeoutPromise(() => {
+
+      //   this.logSysteminfo(machine);
+
+      // }).then(() => timeoutPromise(() => {
+
+      //   this.logEnv(machine);
+
+      // })).then(() => timeoutPromise(() => {
+
+      //   this.logService(machine);
+
+      // })).then(() => timeoutPromise(() => {
+
+      //   this.logApp(machine);
+
+      // })).then(() => timeoutPromise(() => {
+
+      //   this.logChocolatey(machine);
+
+      // })).then(() => timeoutPromise(() => {
+
+      //   this.logNodejs(machine);
+
+      // })).then(() => timeoutPromise(() => {
+
+      //   this.logPython(machine);
+
+      // })).then(() => timeoutPromise(() => {
+
+      //   this.logVscode(machine);
+
+      // })).then(() => timeoutPromise(() => {
+
+      //   this.outputLog(machine);
+      //   this.channel.appendLine(`[${this.timestamp()}] done.`);
+      //   resolve(true);
+
+      // })).catch((reason) => {
+
+      //   reject(reason);
+
+      // });
     });
   }
 
@@ -163,10 +207,8 @@ class PackageLogger {
       fs.mkdirSync(this.apppath);
     }
 
-    // check computernamepath
-    let computernamepath = `${this.apppath}\\${this.computername}`;
-
     // clear compuernamepath
+    let computernamepath = `${this.apppath}\\${this.computername}`;
     if (fs.existsSync(computernamepath)) {
       fs.rmSync(computernamepath, { recursive: true, force: true });
     }
@@ -180,7 +222,7 @@ class PackageLogger {
         for (const cat3 in machine[cat1][cat2]) {
           let cat3x = cat3.replace(/[:/\\\*\?\"\|<>]/g, ""); // : / \ * ? " |< > 
           if (cat3 !== cat3x) {
-            this.channel.appendLine(`[${this.timestamp()}]   * ${cat3} -> ${cat3x}`);
+            this.channel.appendLine(`[${this.timestamp()}]   *** ${cat3} -> ${cat3x}`);
           }
           fs.writeFileSync(`${computernamepath}\\${cat1}\\${cat2}\\${cat3x}`, machine[cat1][cat2][cat3]);
         }
@@ -271,9 +313,10 @@ class PackageLogger {
     let cmd2 = `reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
     let cmd3 = `reg query HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
     let text = "";
-    text += this.execCommand(`chcp 65001 1>NUL && ${cmd1}`) || "";
-    text += this.execCommand(`chcp 65001 1>NUL && ${cmd2}`) || "";
-    text += this.execCommand(`chcp 65001 1>NUL && ${cmd3}`) || "";
+    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd1}`) || "") + "\r\n";
+    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd2}`) || "") + "\r\n";
+    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd3}`) || "") + "\r\n";
+    text += "HKEY";
     if (!text) { return; }
 
     this.channel.appendLine(`[${this.timestamp()}] - ${cmd1}`);
@@ -282,7 +325,6 @@ class PackageLogger {
 
     machine.package.app = {};
     let lines = text.split(/[\r\n]+/);
-    console.log(lines);
     lines.shift(); // delete first line
 
     let displayname = null;
@@ -293,9 +335,12 @@ class PackageLogger {
       if (word[0] === "DisplayName") displayname = word.slice(2).join(" ");
       if (word[0] === "DisplayVersion") displayversion = word[2];
 
-      if (displayname && displayversion) {
+      if (line.startsWith("HKEY") && displayname) {
 
-        let name = `${displayname}@${displayversion}`; // get name
+        let name = displayname; // get name
+        if (displayversion) {
+          name = `${displayname}@${displayversion}`; // get name with version
+        }
         let value = name; // get value
         machine.package.app[name] = value;
 
@@ -319,7 +364,7 @@ class PackageLogger {
     lines.pop(); // delete last line"
     for (const line of lines) {
       let word = line.split(/ +/);
-      let name = word.join("@"); // get name
+      let name = word.join("@"); // get name with version
       let value = name; // get value
       if (name && value) {
         machine.package.chocolatey[name] = value;
@@ -341,6 +386,8 @@ class PackageLogger {
     lines.shift(); // delete first line
     for (const line of lines) {
       if (line.endsWith("packages installed.")) continue;
+
+      // TODO 以下の処理が十分でない
       if (line.startsWith("Did you know Pro / Business automatically syncs with Programs and")) continue;
       if (line.startsWith(" Features? Learn more about Package Synchronizer at")) continue;
       if (line.startsWith(" https://chocolatey.org/compare")) continue;
@@ -367,7 +414,7 @@ class PackageLogger {
     lines.shift(); // delete first line
     lines.shift(); // delete second line
     for (const line of lines) {
-      let name = line.split(/ +/).join("@"); // get name
+      let name = line.split(/ +/).join("@"); // get name with version
       let value = name; // get value
       if (name && value) {
         machine.package.python[name] = value;
@@ -387,7 +434,7 @@ class PackageLogger {
     machine.package.vscode = {};
     let lines = text.split(/[\r\n]+/);
     for (const line of lines) {
-      let name = line; // get name
+      let name = line; // get name with version
       let value = name; // get value
       if (name && value) {
         machine.package.vscode[name] = value;
