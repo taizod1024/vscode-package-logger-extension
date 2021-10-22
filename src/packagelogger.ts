@@ -1,6 +1,23 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import child_process, { ExecFileSyncOptions } from "child_process";
+import { resolve } from "path/posix";
+import { rejects } from "assert";
+
+/** promise with timeout */
+const timeoutPromise = (func: () => void) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(function () {
+      try {
+        func();
+        resolve(true);
+      }
+      catch (ex) {
+        reject(ex);
+      }
+    });
+  });
+};
 
 /** package-logger-extesnion class */
 class PackageLogger {
@@ -22,15 +39,6 @@ class PackageLogger {
 
   /** computer name h*/
   public computername: string;
-
-  /** computer name pathh */
-  public computernamepath: string;
-
-  /** os path */
-  public osxpath: string;
-
-  /** package path */
-  public packagexpath: string;
 
   /** constructor */
   constructor() { }
@@ -58,12 +66,9 @@ class PackageLogger {
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.logPackage`, () => {
-        try {
-          this.logPackage();
-        }
-        catch (ex) {
-          packagelogger.channel.appendLine("**** " + ex + " ****");
-        }
+        this.logPackage().catch(reason => {
+          packagelogger.channel.appendLine("**** " + reason + " ****");
+        });
       })
     );
   }
@@ -76,7 +81,7 @@ class PackageLogger {
   }
 
   /** log package */
-  public logPackage() {
+  public async logPackage() {
     this.channel.appendLine(`--------`);
     this.channel.appendLine(`[${this.timestamp()}] logPackage:`);
     this.channel.show();
@@ -101,21 +106,52 @@ class PackageLogger {
     // TODO get winget
     // TODO get scoop
     let machine: any = { os: {}, package: {} };
-    this.logSysteminfo(machine);
-    this.logEnv(machine);
-    this.logService(machine);
-    // this.logWinget(machine);
-    this.logNodejs(machine);
-    this.logChocolatey(machine);
-    this.logPython(machine);
-    this.logVscode(machine);
-    this.logApp(machine);
-    console.log(machine);
 
-    // output log
-    this.outputLog(machine);
+    return new Promise((resolve, reject) => {
+      timeoutPromise(() => {
 
-    this.channel.appendLine(`[${this.timestamp()}] done.`);
+        this.logSysteminfo(machine);
+
+      }).then(() => timeoutPromise(() => {
+
+        this.logEnv(machine);
+
+      })).then(() => timeoutPromise(() => {
+
+        this.logService(machine);
+
+      })).then(() => timeoutPromise(() => {
+
+        this.logApp(machine);
+
+      })).then(() => timeoutPromise(() => {
+
+        this.logChocolatey(machine);
+
+      })).then(() => timeoutPromise(() => {
+
+        this.logNodejs(machine);
+
+      })).then(() => timeoutPromise(() => {
+
+        this.logPython(machine);
+
+      })).then(() => timeoutPromise(() => {
+
+        this.logVscode(machine);
+
+      })).then(() => timeoutPromise(() => {
+
+        this.outputLog(machine);
+        this.channel.appendLine(`[${this.timestamp()}] done.`);
+        resolve(true);
+
+      })).catch((reason) => {
+
+        reject(reason);
+
+      });
+    });
   }
 
   //** output log */
@@ -128,27 +164,25 @@ class PackageLogger {
     }
 
     // check computernamepath
-    this.computernamepath = `${this.apppath}\\${this.computername}`;
-    // if (!fs.existsSync(this.computernamepath)) {
-    //   fs.mkdirSync(this.computernamepath);
-    //   this.channel.appendLine(`[${this.timestamp()}]   -> ${this.computernamepath}`);
-    // }
+    let computernamepath = `${this.apppath}\\${this.computername}`;
 
-    // 
-    let oldpath = `${this.computernamepath}_old`;
-    let newpath = `${this.computernamepath}_new`;
-    if (fs.existsSync(newpath)) {
-      fs.rmSync(newpath, { recursive: true, force: true });
+    // clear compuernamepath
+    if (fs.existsSync(computernamepath)) {
+      fs.rmSync(computernamepath, { recursive: true, force: true });
     }
-    fs.mkdirSync(newpath, { recursive: true });
+    fs.mkdirSync(computernamepath, { recursive: true });
 
     // output log
     for (const cat1 in machine) {
-      fs.mkdirSync(`${newpath}\\${cat1}`);
+      fs.mkdirSync(`${computernamepath}\\${cat1}`);
       for (const cat2 in machine[cat1]) {
-        fs.mkdirSync(`${newpath}\\${cat1}\\${cat2}`);
+        fs.mkdirSync(`${computernamepath}\\${cat1}\\${cat2}`);
         for (const cat3 in machine[cat1][cat2]) {
-          fs.writeFileSync(`${newpath}\\${cat1}\\${cat2}\\${cat3}`, machine[cat1][cat2][cat3]);
+          let cat3x = cat3.replace(/[:/\\\*\?\"\|<>]/g, ""); // : / \ * ? " |< > 
+          if (cat3 !== cat3x) {
+            this.channel.appendLine(`[${this.timestamp()}]   * ${cat3} -> ${cat3x}`);
+          }
+          fs.writeFileSync(`${computernamepath}\\${cat1}\\${cat2}\\${cat3x}`, machine[cat1][cat2][cat3]);
         }
       }
     }
@@ -170,13 +204,13 @@ class PackageLogger {
       "Virtual Memory: In Use:"
     ];
     let lines = text.split(/[\r\n]+/);
-    let content = "";
+    let value = "";
     for (const line of lines) {
       if (excludes.some(val => line.startsWith(val))) continue;
-      content += line + "\r\n";
+      value += line + "\r\n";
     }
     machine.os.system = {};
-    machine.os.system.systeminfo = content;
+    machine.os.system.systeminfo = value;
   }
 
   /** log env */
@@ -194,14 +228,19 @@ class PackageLogger {
     for (const envname in process.env) {
       if (excludes.some(val => envname.startsWith(val))) continue;
       let name = envname;
-      let content = `${envname} = ` + process.env[envname].replace(/;/g, "\r\n") || "";
-      machine.os.env[name] = content;
+      let value = process.env[envname] || "";
+      if (value.indexOf(";") < 0) {
+        value = `${envname}=${value}`;
+      } else {
+        value = `${envname}=\r\n` + value.replace(/;/g, "\r\n");
+      }
+      machine.os.env[name] = value;
     }
   }
 
   // TODO executing flag
   // TODO / : \ * ? < > | "
-  
+
   /** log service */
   public logService(machine: any) {
 
@@ -217,44 +256,20 @@ class PackageLogger {
     for (const line of lines) {
       if (line.startsWith(LABEL)) {
         let name = line.substr(LABEL.length); // get name
-        let content = name;
-        if (name && content) {
-          machine.os.service[name] = content;
+        let value = name;
+        if (name && value) {
+          machine.os.service[name] = value;
         }
       }
     }
   }
 
-  // /** log winget */
-  // public logWinget(machine: any) {
-
-  //   // TODO too long name
-
-  //   let cmd = "winget list";
-  //   let text = this.execCommand(cmd);
-  //   if (!text) { return; }
-
-  //   this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
-
-  //   machine.package.winget = {};
-  //   let lines = text.split(/[\r\n]+/);
-  //   lines.shift(); // delete first line
-  //   for (const line of lines) {
-  //     let word = line.split(/[ @]/).slice(1); // delete first word
-  //     let name = word[0]; // get name
-  //     let content = word.join(" "); // get content
-  //     if (name && content) {
-  //       machine.package.winget[name] = content;
-  //     }
-  //   }
-  // }
-
-  /** log winget */
+  /** log app */
   public logApp(machine: any) {
 
-    let cmd1 = `reg query "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall" /s`;
-    let cmd2 = `reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" /s`;
-    let cmd3 = `reg query "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" /s`;
+    let cmd1 = `reg query HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
+    let cmd2 = `reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
+    let cmd3 = `reg query HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
     let text = "";
     text += this.execCommand(`chcp 65001 1>NUL && ${cmd1}`) || "";
     text += this.execCommand(`chcp 65001 1>NUL && ${cmd2}`) || "";
@@ -267,6 +282,7 @@ class PackageLogger {
 
     machine.package.app = {};
     let lines = text.split(/[\r\n]+/);
+    console.log(lines);
     lines.shift(); // delete first line
 
     let displayname = null;
@@ -280,8 +296,8 @@ class PackageLogger {
       if (displayname && displayversion) {
 
         let name = `${displayname}@${displayversion}`; // get name
-        let content = name; // get content
-        machine.package.app[name] = content;
+        let value = name; // get value
+        machine.package.app[name] = value;
 
         displayname = null;
         displayversion = null;
@@ -304,9 +320,9 @@ class PackageLogger {
     for (const line of lines) {
       let word = line.split(/ +/);
       let name = word.join("@"); // get name
-      let content = name; // get content
-      if (name && content) {
-        machine.package.chocolatey[name] = content;
+      let value = name; // get value
+      if (name && value) {
+        machine.package.chocolatey[name] = value;
       }
     }
   }
@@ -330,9 +346,9 @@ class PackageLogger {
       if (line.startsWith(" https://chocolatey.org/compare")) continue;
 
       let name = line.split(/[ @]/).slice(1).join("@"); // delete first word and get name
-      let content = name; // get content
-      if (name && content) {
-        machine.package.nodejs[name] = content;
+      let value = name; // get value
+      if (name && value) {
+        machine.package.nodejs[name] = value;
       }
     }
   }
@@ -352,9 +368,9 @@ class PackageLogger {
     lines.shift(); // delete second line
     for (const line of lines) {
       let name = line.split(/ +/).join("@"); // get name
-      let content = name; // get content
-      if (name && content) {
-        machine.package.python[name] = content;
+      let value = name; // get value
+      if (name && value) {
+        machine.package.python[name] = value;
       }
     }
   }
@@ -372,9 +388,9 @@ class PackageLogger {
     let lines = text.split(/[\r\n]+/);
     for (const line of lines) {
       let name = line; // get name
-      let content = name; // get content
-      if (name && content) {
-        machine.package.vscode[name] = content;
+      let value = name; // get value
+      if (name && value) {
+        machine.package.vscode[name] = value;
       }
     }
   }
