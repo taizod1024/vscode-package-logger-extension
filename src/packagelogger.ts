@@ -364,6 +364,7 @@ class PackageLogger {
     lines.pop(); // delete last line"
     for (const line of lines) {
       let word = line.split(/ +/);
+      if (word.length !== 2) continue; // check name and version
       let name = word.join("@"); // get name with version
       let value = name; // get value
       if (name && value) {
