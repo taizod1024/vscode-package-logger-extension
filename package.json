@@ -18,10 +18,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "package-logger.toggleDebug",
-        "title": "Package Logger: Toggle Debug"
-      },
-      {
         "command": "package-logger.logPackage",
         "title": "Package Logger: Log Package"
       }

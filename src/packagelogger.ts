@@ -25,9 +25,6 @@ class PackageLogger {
   /** application id for vscode */
   public appid = "package-logger";
 
-  /** flag for debug  */
-  public debug: boolean;
-
   /** channel on vscode */
   public channel: vscode.OutputChannel;
 
@@ -50,43 +47,25 @@ class PackageLogger {
     this.channel = vscode.window.createOutputChannel(this.appid);
     this.channel.appendLine(`[${this.timestamp()}] ${this.appid} activated`);
 
-    // init context
-    this.debug = false;
-
     // init vscode
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.toggleDebug`, () => {
-        try {
-          this.toggleDebug();
-        }
-        catch (ex) {
-          packagelogger.channel.appendLine("**** " + ex + " ****");
-        }
-      })
-    );
-    context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.logPackage`, () => {
-        this.logPackage().catch(reason => {
-          packagelogger.channel.appendLine("**** " + reason + " ****");
-        });
+        this.logPackageAsync()
+          .catch(reason => {
+            packagelogger.channel.appendLine("**** " + reason + " ****");
+          });
       })
     );
-  }
-
-  /** toggle debug */
-  public toggleDebug() {
-    this.channel.appendLine(`--------`);
-
-    this.setDebug(!this.debug);
   }
 
   /** log package */
-  public async logPackage() {
-    this.channel.appendLine(`--------`);
+  public async logPackageAsync() {
+
+    // show channel
     this.channel.appendLine(`[${this.timestamp()}] logPackage:`);
     this.channel.show();
 
-    // projectpath
+    // check projectpath
     this.projectpath = null;
     if (vscode.workspace.workspaceFolders?.length !== 1) {
       throw "ERROR*: no root or multi root is not supported";
@@ -94,112 +73,298 @@ class PackageLogger {
     this.projectpath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     this.channel.appendLine(`[${this.timestamp()}] - projectpath: ${this.projectpath}`);
 
-    // computername
+    // check computername
     this.computername = process.env.computername;
     if (this.computername === null) {
       throw `ERROR: environment variable COMPUTERNAME missing`;
     }
     this.channel.appendLine(`[${this.timestamp()}] - computername: ${this.computername}`);
 
-    // log os and package
-    // TODO get windows features
-    // TODO get winget
-    // TODO get scoop
+    // log any
     let machine: any = { os: {}, package: {} };
+    await timeoutPromise(() => this.logSysteminfo(machine));
+    await timeoutPromise(() => this.logEnv(machine));
+    await timeoutPromise(() => this.logApp(machine));
+    await timeoutPromise(() => this.logChocolatey(machine));
+    await timeoutPromise(() => this.logNodejs(machine));
+    await timeoutPromise(() => this.logPython(machine));
+    await timeoutPromise(() => this.logVscode(machine));
+    await timeoutPromise(() => this.logWinget(machine));
+    await timeoutPromise(() => this.logScoop(machine));
 
-    return new Promise((resolve, reject) => {
-      timeoutPromise(() => {
+    // output log
+    this.outputLog(machine);
 
-        this.logSysteminfo(machine);
+    this.channel.appendLine(`[${this.timestamp()}] - done`);
+  }
 
-      }).then(() => timeoutPromise(() => {
+  /** log systeminfo */
+  public logSysteminfo(machine: any) {
 
-        this.logEnv(machine);
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - systeminfo`);
 
-      })).then(() => timeoutPromise(() => {
+    // show command
+    let cmd = "systeminfo";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    let text = this.execCommand(`chcp 65001 1>NUL && ${cmd}`);
+    if (!text) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      return;
+    }
 
-        this.logService(machine);
+    // modify processor clock 
+    text = text.replace(/~[0-9]+ Mhz/g, "~xxxx Mhz");
 
-      })).then(() => timeoutPromise(() => {
+    // name to be excluded
+    let excludes = [
+      "System Boot Time:",
+      "Available Physical Memory:",
+      "Virtual Memory: Available:",
+      "Virtual Memory: In Use:"
+    ];
 
-        this.logApp(machine);
+    // modify text
+    let lines = text.split(/[\r\n]+/);
+    let value = "";
+    for (const line of lines) {
+      if (excludes.some(val => line.startsWith(val))) continue; // exclude dynamic section
+      value += line + "\r\n";
+    }
+    machine.os.system = {};
+    machine.os.system.systeminfo = value;
+  }
 
-      })).then(() => timeoutPromise(() => {
+  /** log env */
+  public logEnv(machine: any) {
 
-        this.logChocolatey(machine);
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - environment variables`);
+    this.channel.appendLine(`[${this.timestamp()}]   - environment variables inherited from the parent process`);
 
-      })).then(() => timeoutPromise(() => {
+    // name to be excluded because of context
+    let excludes = [
+      "__COMPAT_LAYER",                             // for uac
+      "ELECTRON_RUN_AS_NODE",                       // for electron
+      "VSCODE_",                                    // for vscode
+      "APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL", // for debug
+      "CHROME_CRASHPAD_PIPE_NAME",                  // for chrome
+      "SESSIONNAME"                                 // for child process
+    ];
 
-        this.logNodejs(machine);
+    // get env from process information
+    machine.os.env = {};
+    for (const envname in process.env) {
+      if (excludes.some(val => envname.startsWith(val))) continue; // exclude context
+      let name = envname;
+      let value = process.env[envname] || "";
+      if (value.indexOf(";") < 0) {
+        value = `${envname}=${value}`; // single value
+      } else {
+        value = `${envname}=\r\n` + value.replace(/;/g, "\r\n"); // multivalue
+      }
+      machine.os.env[name] = value;
+    }
+  }
 
-      })).then(() => timeoutPromise(() => {
+  /** log app */
+  public logApp(machine: any) {
 
-        this.logPython(machine);
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - app`);
 
-      })).then(() => timeoutPromise(() => {
+    // show command
+    let cmd1 = `reg query HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
+    let cmd2 = `reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
+    let cmd3 = `reg query HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd1}`);
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd2}`);
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd3}`);
 
-        this.logVscode(machine);
+    let text = "";
+    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd1}`) || "") + "\r\n";
+    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd2}`) || "") + "\r\n";
+    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd3}`) || "") + "\r\n";
+    text += "HKEY"; // for sentinel
+    if (!text) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      return;
+    }
 
-      })).then(() => timeoutPromise(() => {
+    machine.package.app = {};
+    let lines = text.split(/[\r\n]+/);
+    lines.shift(); // delete first line
 
-        this.outputLog(machine);
-        this.channel.appendLine(`[${this.timestamp()}] done.`);
-        resolve(true);
+    // get app from command result
+    let displayname = null;
+    let displayversion = null;
+    for (const line of lines) {
 
-      })).catch((reason) => {
+      let word = line.trim().split(/ +/);
+      if (word[0] === "DisplayName") displayname = word.slice(2).join(" ");
+      if (word[0] === "DisplayVersion") displayversion = word[2];
 
-        reject(reason);
+      if (line.startsWith("HKEY") && displayname) {
 
-      });
+        let name;
+        if (!displayversion) {
+          name = displayname; // name without version
+        } else {
+          name = `${displayname}@${displayversion}`; // name with version
+        }
+        let value = name;
+        machine.package.app[name] = value;
 
-      // timeoutPromise(() => {
+        displayname = null;
+        displayversion = null;
+      }
+    }
+  }
 
-      //   this.logSysteminfo(machine);
+  /** log winget */
+  public logWinget(machine: any) {
 
-      // }).then(() => timeoutPromise(() => {
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - winget`);
+    this.channel.appendLine(`[${this.timestamp()}]   - not implemented`);
 
-      //   this.logEnv(machine);
+  }
 
-      // })).then(() => timeoutPromise(() => {
+  /** log chocolatey */
+  public logChocolatey(machine: any) {
 
-      //   this.logService(machine);
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - chocolatey`);
 
-      // })).then(() => timeoutPromise(() => {
+    // show command
+    let cmd = "choco list --local-only";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    let text = this.execCommand(cmd);
+    if (!text) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      return;
+    }
 
-      //   this.logApp(machine);
+    // get packages from command result
+    machine.package.chocolatey = {};
+    let lines = text.split(/[\r\n]+/);
+    lines.pop(); // delete last line"
 
-      // })).then(() => timeoutPromise(() => {
+    for (const line of lines) {
+      let word = line.split(/ +/);
+      if (word.length !== 2) continue; // check name and version
+      let name = word.join("@"); // name with version
+      let value = name;
+      if (name && value) {
+        machine.package.chocolatey[name] = value;
+      }
+    }
+  }
 
-      //   this.logChocolatey(machine);
+  /** log scoop */
+  public logScoop(machine: any) {
 
-      // })).then(() => timeoutPromise(() => {
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - scoop`);
+    this.channel.appendLine(`[${this.timestamp()}]   - not implemented`);
 
-      //   this.logNodejs(machine);
+  }
 
-      // })).then(() => timeoutPromise(() => {
+  /** log nodejs */
+  public logNodejs(machine: any) {
 
-      //   this.logPython(machine);
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - nodejs`);
 
-      // })).then(() => timeoutPromise(() => {
+    // show command
+    let cmd = "npm list --global";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    let text = this.execCommand(cmd);
+    if (!text) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      return;
+    }
 
-      //   this.logVscode(machine);
+    // get packages from command result
+    machine.package.nodejs = {};
+    let lines = text.split(/[\r\n]+/);
+    lines.shift(); // delete first line
+    for (const line of lines) {
+      if (line.endsWith("packages installed.")) continue;
 
-      // })).then(() => timeoutPromise(() => {
+      // ignore message
+      if (line.startsWith("Did you know Pro / Business automatically syncs with Programs and")) continue;
+      if (line.startsWith(" Features? Learn more about Package Synchronizer at")) continue;
+      if (line.startsWith(" https://chocolatey.org/compare")) continue;
 
-      //   this.outputLog(machine);
-      //   this.channel.appendLine(`[${this.timestamp()}] done.`);
-      //   resolve(true);
+      let name = line.split(/[ @]/).slice(1).join("@"); // delete first word and get name
+      let value = name;
+      if (name && value) {
+        machine.package.nodejs[name] = value;
+      }
+    }
+  }
 
-      // })).catch((reason) => {
+  /** log python */
+  public logPython(machine: any) {
 
-      //   reject(reason);
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - python`);
 
-      // });
-    });
+    // show command
+    let cmd = "pip list";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    let text = this.execCommand(cmd);
+    if (!text) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      return;
+    }
+
+    // get packages from command result
+    machine.package.python = {};
+    let lines = text.split(/[\r\n]+/);
+    lines.shift(); // delete first line
+    lines.shift(); // delete second line
+    for (const line of lines) {
+      let name = line.split(/ +/).join("@"); // name with version
+      let value = name;
+      if (name && value) {
+        machine.package.python[name] = value;
+      }
+    }
+  }
+
+  /** log vscode */
+  public logVscode(machine: any) {
+
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - vscode`);
+
+    // show command
+    let cmd = "code --list-extensions --show-versions";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    let text = this.execCommand(cmd);
+    if (!text) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      return;
+    }
+
+    // get packages from command result
+    machine.package.vscode = {};
+    let lines = text.split(/[\r\n]+/);
+    for (const line of lines) {
+      let name = line; // name with version
+      let value = name;
+      if (name && value) {
+        machine.package.vscode[name] = value;
+      }
+    }
   }
 
   //** output log */
   public outputLog(machine: any) {
+
+    this.channel.appendLine(`[${this.timestamp()}] - output`);
 
     // check apppath
     this.apppath = `${this.projectpath}\\${this.appid}`;
@@ -222,223 +387,15 @@ class PackageLogger {
         for (const cat3 in machine[cat1][cat2]) {
           let cat3x = cat3.replace(/[:/\\\*\?\"\|<>]/g, ""); // : / \ * ? " |< > 
           if (cat3 !== cat3x) {
-            this.channel.appendLine(`[${this.timestamp()}]   *** ${cat3} -> ${cat3x}`);
+            this.channel.appendLine(`[${this.timestamp()}]   - rename: ${cat3} -> ${cat3x}`);
           }
-          fs.writeFileSync(`${computernamepath}\\${cat1}\\${cat2}\\${cat3x}`, machine[cat1][cat2][cat3]);
+          try {
+            fs.writeFileSync(`${computernamepath}\\${cat1}\\${cat2}\\${cat3x}`, machine[cat1][cat2][cat3]);
+          }
+          catch (ex) {
+            throw ex;
+          }
         }
-      }
-    }
-  }
-
-  /** log systeminfo */
-  public logSysteminfo(machine: any) {
-
-    let cmd = "systeminfo";
-    let text = this.execCommand(`chcp 65001 1>NUL && ${cmd}`);
-    if (!text) { return; }
-
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
-
-    let excludes = [
-      "System Boot Time:",
-      "Available Physical Memory:",
-      "Virtual Memory: Available:",
-      "Virtual Memory: In Use:"
-    ];
-    let lines = text.split(/[\r\n]+/);
-    let value = "";
-    for (const line of lines) {
-      if (excludes.some(val => line.startsWith(val))) continue;
-      value += line + "\r\n";
-    }
-    machine.os.system = {};
-    machine.os.system.systeminfo = value;
-  }
-
-  /** log env */
-  public logEnv(machine: any) {
-
-    this.channel.appendLine(`[${this.timestamp()}] - environment variables`);
-
-    let excludes = [
-      "VSCODE_",
-      "APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL",
-      "CHROME_CRASHPAD_PIPE_NAME",
-      "SESSIONNAME"
-    ];
-    machine.os.env = {};
-    for (const envname in process.env) {
-      if (excludes.some(val => envname.startsWith(val))) continue;
-      let name = envname;
-      let value = process.env[envname] || "";
-      if (value.indexOf(";") < 0) {
-        value = `${envname}=${value}`;
-      } else {
-        value = `${envname}=\r\n` + value.replace(/;/g, "\r\n");
-      }
-      machine.os.env[name] = value;
-    }
-  }
-
-  // TODO executing flag
-  // TODO / : \ * ? < > | "
-
-  /** log service */
-  public logService(machine: any) {
-
-    let cmd = "sc query";
-    let text = this.execCommand(cmd);
-    if (!text) { return; }
-
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
-
-    machine.os.service = {};
-    let LABEL = "SERVICE_NAME: ";
-    let lines = text.split(/[\r\n]+/);
-    for (const line of lines) {
-      if (line.startsWith(LABEL)) {
-        let name = line.substr(LABEL.length); // get name
-        let value = name;
-        if (name && value) {
-          machine.os.service[name] = value;
-        }
-      }
-    }
-  }
-
-  /** log app */
-  public logApp(machine: any) {
-
-    let cmd1 = `reg query HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
-    let cmd2 = `reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
-    let cmd3 = `reg query HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s`;
-    let text = "";
-    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd1}`) || "") + "\r\n";
-    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd2}`) || "") + "\r\n";
-    text += (this.execCommand(`chcp 65001 1>NUL && ${cmd3}`) || "") + "\r\n";
-    text += "HKEY";
-    if (!text) { return; }
-
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd1}`);
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd2}`);
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd3}`);
-
-    machine.package.app = {};
-    let lines = text.split(/[\r\n]+/);
-    lines.shift(); // delete first line
-
-    let displayname = null;
-    let displayversion = null;
-    for (const line of lines) {
-
-      let word = line.trim().split(/ +/);
-      if (word[0] === "DisplayName") displayname = word.slice(2).join(" ");
-      if (word[0] === "DisplayVersion") displayversion = word[2];
-
-      if (line.startsWith("HKEY") && displayname) {
-
-        let name = displayname; // get name
-        if (displayversion) {
-          name = `${displayname}@${displayversion}`; // get name with version
-        }
-        let value = name; // get value
-        machine.package.app[name] = value;
-
-        displayname = null;
-        displayversion = null;
-      }
-    }
-  }
-
-  /** log chocolatey */
-  public logChocolatey(machine: any) {
-
-    let cmd = "choco list --local-only";
-    let text = this.execCommand(cmd);
-    if (!text) { return; }
-
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
-
-    machine.package.chocolatey = {};
-    let lines = text.split(/[\r\n]+/);
-    lines.pop(); // delete last line"
-    for (const line of lines) {
-      let word = line.split(/ +/);
-      if (word.length !== 2) continue; // check name and version
-      let name = word.join("@"); // get name with version
-      let value = name; // get value
-      if (name && value) {
-        machine.package.chocolatey[name] = value;
-      }
-    }
-  }
-
-  /** log nodejs */
-  public logNodejs(machine: any) {
-
-    let cmd = "npm list --global";
-    let text = this.execCommand(cmd);
-    if (!text) { return; }
-
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
-
-    machine.package.nodejs = {};
-    let lines = text.split(/[\r\n]+/);
-    lines.shift(); // delete first line
-    for (const line of lines) {
-      if (line.endsWith("packages installed.")) continue;
-
-      // TODO 以下の処理が十分でない
-      if (line.startsWith("Did you know Pro / Business automatically syncs with Programs and")) continue;
-      if (line.startsWith(" Features? Learn more about Package Synchronizer at")) continue;
-      if (line.startsWith(" https://chocolatey.org/compare")) continue;
-
-      let name = line.split(/[ @]/).slice(1).join("@"); // delete first word and get name
-      let value = name; // get value
-      if (name && value) {
-        machine.package.nodejs[name] = value;
-      }
-    }
-  }
-
-  /** log python */
-  public logPython(machine: any) {
-
-    let cmd = "pip list";
-    let text = this.execCommand(cmd);
-    if (!text) { return; }
-
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
-
-    machine.package.python = {};
-    let lines = text.split(/[\r\n]+/);
-    lines.shift(); // delete first line
-    lines.shift(); // delete second line
-    for (const line of lines) {
-      let name = line.split(/ +/).join("@"); // get name with version
-      let value = name; // get value
-      if (name && value) {
-        machine.package.python[name] = value;
-      }
-    }
-  }
-
-  /** log vscode */
-  public logVscode(machine: any) {
-
-    let cmd = "code --list-extensions --show-versions";
-    let text = this.execCommand(cmd);
-    if (!text) { return; }
-
-    this.channel.appendLine(`[${this.timestamp()}] - ${cmd}`);
-
-    machine.package.vscode = {};
-    let lines = text.split(/[\r\n]+/);
-    for (const line of lines) {
-      let name = line; // get name with version
-      let value = name; // get value
-      if (name && value) {
-        machine.package.vscode[name] = value;
       }
     }
   }
@@ -454,16 +411,6 @@ class PackageLogger {
       this.channel.appendLine(`[${this.timestamp()}] - [skip] ${cmd}`);
     }
     return text;
-  }
-
-  /** set debug */
-  public setDebug(debug: boolean, force = false) {
-    this.channel.appendLine(`[${this.timestamp()}] setDebug(${[...arguments]})`);
-
-    if (this.debug !== debug || force) {
-      this.debug = debug;
-      vscode.commands.executeCommand("setContext", `${this.appid}Debug`, this.debug);
-    }
   }
 
   /** return timestamp string */
