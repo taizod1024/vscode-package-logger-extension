@@ -222,7 +222,7 @@ class PackageLogger {
   }
 
   /** log winget */
-  public logWinget(machine: any) {
+  public logWinget(_machine: any) {
 
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - winget`);
@@ -262,7 +262,7 @@ class PackageLogger {
   }
 
   /** log scoop */
-  public logScoop(machine: any) {
+  public logScoop(_machine: any) {
 
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - scoop`);
