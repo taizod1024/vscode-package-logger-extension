@@ -65,6 +65,7 @@ class PackageLogger {
   public async logPackageAsync() {
 
     // show channel
+    this.channel.appendLine(`--------`);
     this.channel.appendLine(`[${this.timestamp()}] logPackage:`);
     this.channel.show();
 
@@ -295,7 +296,14 @@ class PackageLogger {
     for (const line of lines) {
       if (line.endsWith("packages installed.")) continue;
 
-      // ignore message
+      // ignore header message
+      if (line.indexOf("validations performed.") >= 0) continue;
+      if (line.startsWith("Validation Warnings:")) continue;
+      if (line.startsWith(" - A pending system reboot request has been detected, however, this is")) continue;
+      if (line.startsWith("   being ignored due to the current command being used 'list'.")) continue;
+      if (line.startsWith("   It is recommended that you reboot at your earliest convenience.")) continue;
+
+      // ignore fotter message
       if (line.startsWith("Did you know Pro / Business automatically syncs with Programs and")) continue;
       if (line.startsWith(" Features? Learn more about Package Synchronizer at")) continue;
       if (line.startsWith(" https://chocolatey.org/compare")) continue;
