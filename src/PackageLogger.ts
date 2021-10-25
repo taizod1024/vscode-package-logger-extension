@@ -65,6 +65,7 @@ class PackageLogger {
   public async logPackageAsync() {
 
     // show channel
+    this.channel.appendLine(`--------`);
     this.channel.appendLine(`[${this.timestamp()}] logPackage:`);
     this.channel.show();
 
@@ -254,6 +255,14 @@ class PackageLogger {
     lines.pop(); // delete last line"
 
     for (const line of lines) {
+
+      // ignore message
+      if (line.indexOf("validations performed.") >= 0) continue;
+      if (line.startsWith("Validation Warnings:")) continue;
+      if (line.startsWith(" - A pending system reboot request has been detected, however, this is")) continue;
+      if (line.startsWith("   being ignored due to the current command being used 'list'.")) continue;
+      if (line.startsWith("   It is recommended that you reboot at your earliest convenience.")) continue;
+
       let word = line.split(/ +/);
       if (word.length !== 2) continue; // check name and version
       let name = word.join("@"); // name with version
