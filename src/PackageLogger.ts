@@ -229,7 +229,7 @@ class PackageLogger {
 
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - winget`);
-    this.channel.appendLine(`[${this.timestamp()}]   - not implemented`);
+    this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
 
   }
 
@@ -269,7 +269,7 @@ class PackageLogger {
 
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - scoop`);
-    this.channel.appendLine(`[${this.timestamp()}]   - not implemented`);
+    this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
 
   }
 
