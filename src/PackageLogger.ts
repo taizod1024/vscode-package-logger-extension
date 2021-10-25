@@ -31,6 +31,9 @@ class PackageLogger {
   /** project path */
   public projectpath: string;
 
+  /** app path name */
+  public apppathname = "package-log";
+
   /** app path */
   public apppath: string;
 
@@ -367,7 +370,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}] - output`);
 
     // check apppath
-    this.apppath = `${this.projectpath}\\${this.appid}`;
+    this.apppath = `${this.projectpath}\\${this.apppathname}`;
     if (!fs.existsSync(this.apppath)) {
       fs.mkdirSync(this.apppath);
     }
