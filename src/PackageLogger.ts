@@ -113,7 +113,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(`chcp 65001 1>NUL && ${cmd}`);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
       return;
     }
 
@@ -191,7 +191,7 @@ class PackageLogger {
     text += (this.execCommand(`chcp 65001 1>NUL && ${cmd3}`) || "") + "\r\n";
     text += "HKEY"; // for sentinel
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
       return;
     }
 
@@ -245,7 +245,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
       return;
     }
 
@@ -293,7 +293,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
       return;
     }
 
@@ -328,7 +328,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
       return;
     }
 
@@ -357,7 +357,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
       return;
     }
 
