@@ -420,7 +420,6 @@ class PackageLogger {
       text = child_process.execSync(cmd, options).toString().trim();
     }
     catch (ex) {
-      this.channel.appendLine(`[${this.timestamp()}] - [skip] ${cmd}`);
     }
     return text;
   }
