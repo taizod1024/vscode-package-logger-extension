@@ -29,13 +29,16 @@ class PackageLogger {
   public channel: vscode.OutputChannel;
 
   /** project path */
-  public projectpath: string;
+  public projectPath: string;
 
   /** app path */
-  public apppath: string;
+  public appPath: string;
 
-  /** computer name h*/
-  public computername: string;
+  /** computer name */
+  public computerName: string;
+
+  /** extension path */
+  public extensionPath: string;
 
   /** constructor */
   constructor() { }
@@ -49,7 +52,17 @@ class PackageLogger {
 
     // init vscode
     context.subscriptions.push(
+      vscode.commands.registerCommand(`${this.appid}.updatePackage`, () => {
+        this.extensionPath = context.extensionPath;
+        this.updatePackageAsync()
+          .catch(reason => {
+            packagelogger.channel.appendLine("**** " + reason + " ****");
+          });
+      })
+    );
+    context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.logPackage`, () => {
+        this.extensionPath = context.extensionPath;
         this.logPackageAsync()
           .catch(reason => {
             packagelogger.channel.appendLine("**** " + reason + " ****");
@@ -58,7 +71,21 @@ class PackageLogger {
     );
   }
 
-  /** log package */
+  /** update package async */
+  public async updatePackageAsync() {
+
+    // show channel
+    this.channel.appendLine(`--------`);
+    this.channel.appendLine(`[${this.timestamp()}] updatePackage:`);
+    this.channel.show();
+
+    // exec command as administrator
+    let cmd = `powershell -command start-process 'cmd.exe' '/c ${this.extensionPath}\\src\\updatepackage.cmd' -verb runas`;
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    this.execCommand(cmd);
+  }
+
+  /** log package async */
   public async logPackageAsync() {
 
     // show channel
@@ -67,19 +94,19 @@ class PackageLogger {
     this.channel.show();
 
     // check projectpath
-    this.projectpath = null;
+    this.projectPath = null;
     if (vscode.workspace.workspaceFolders?.length !== 1) {
-      throw "ERROR*: no root or multi root is not supported";
+      throw "ERROR: no root or multi root is not supported";
     }
-    this.projectpath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    this.channel.appendLine(`[${this.timestamp()}] - projectpath: ${this.projectpath}`);
+    this.projectPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    this.channel.appendLine(`[${this.timestamp()}] - projectpath: ${this.projectPath}`);
 
     // check computername
-    this.computername = process.env.computername;
-    if (this.computername === null) {
+    this.computerName = process.env.computername;
+    if (this.computerName === null) {
       throw `ERROR: environment variable COMPUTERNAME missing`;
     }
-    this.channel.appendLine(`[${this.timestamp()}] - computername: ${this.computername}`);
+    this.channel.appendLine(`[${this.timestamp()}] - computername: ${this.computerName}`);
 
     // log any
     let machine: any = { os: {}, package: {} };
@@ -222,15 +249,6 @@ class PackageLogger {
     }
   }
 
-  /** log winget */
-  public logWinget(_machine: any) {
-
-    // show channel
-    this.channel.appendLine(`[${this.timestamp()}] - winget`);
-    this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
-
-  }
-
   /** log chocolatey */
   public logChocolatey(machine: any) {
 
@@ -268,15 +286,6 @@ class PackageLogger {
         machine.package.chocolatey[name] = value;
       }
     }
-  }
-
-  /** log scoop */
-  public logScoop(_machine: any) {
-
-    // show channel
-    this.channel.appendLine(`[${this.timestamp()}] - scoop`);
-    this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
-
   }
 
   /** log nodejs */
@@ -370,19 +379,37 @@ class PackageLogger {
     }
   }
 
+  /** log winget */
+  public logWinget(_machine: any) {
+
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - winget`);
+    this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
+
+  }
+
+  /** log scoop */
+  public logScoop(_machine: any) {
+
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - scoop`);
+    this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
+
+  }
+
   //** output log */
   public outputLog(machine: any) {
 
     this.channel.appendLine(`[${this.timestamp()}] - output`);
 
     // check apppath
-    this.apppath = `${this.projectpath}\\${this.appid}`;
-    if (!fs.existsSync(this.apppath)) {
-      fs.mkdirSync(this.apppath);
+    this.appPath = `${this.projectPath}\\${this.appid}`;
+    if (!fs.existsSync(this.appPath)) {
+      fs.mkdirSync(this.appPath);
     }
 
     // clear compuernamepath
-    let computernamepath = `${this.apppath}\\${this.computername}`;
+    let computernamepath = `${this.appPath}\\${this.computerName}`;
     if (fs.existsSync(computernamepath)) {
       fs.rmSync(computernamepath, { recursive: true, force: true });
     }
@@ -413,7 +440,7 @@ class PackageLogger {
   public execCommand(cmd: string): string {
     let text = null;
     try {
-      const options = { cwd: this.projectpath, };
+      const options = { cwd: this.projectPath, };
       text = child_process.execSync(cmd, options).toString().trim();
     }
     catch (ex) {
