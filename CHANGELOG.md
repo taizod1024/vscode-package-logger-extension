@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.1.0...v0.1.1) (2021-11-05)
+
+
+### Features
+
+* updatePackageコマンド追加 ([da2de62](https://github.com/taizod1024/vscode-package-logger-extension/commit/da2de62c965a067684122ea887f649865e82cbcb))
+
 ## [0.1.0](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.0.8...v0.1.0) (2021-11-03)
 
 
