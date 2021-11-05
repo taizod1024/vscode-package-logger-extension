@@ -20,6 +20,10 @@
       {
         "command": "package-logger.logPackage",
         "title": "Package Logger: Log Package"
+      },
+      {
+        "command": "package-logger.updatePackage",
+        "title": "Package Logger: Update Package"
       }
     ],
     "keybindings": []
