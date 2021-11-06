@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2",
+  "version": "0.1.3",
   "name": "package-logger",
   "displayName": "Package Logger",
   "description": "windows package logger",
@@ -13,9 +13,9 @@
   "main": "./build/main.js",
   "browser": "./build/main.js",
   "activationEvents": [
-      "onCommand:package-logger.updatePackage",
-      "onCommand:package-logger.logPackage",
-      "onCommand:package-logger.updateAndLogPackage"
+    "onCommand:package-logger.updatePackage",
+    "onCommand:package-logger.logPackage",
+    "onCommand:package-logger.updateAndLogPackage"
   ],
   "contributes": {
     "commands": [
