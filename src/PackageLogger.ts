@@ -69,6 +69,18 @@ class PackageLogger {
           });
       })
     );
+    context.subscriptions.push(
+      vscode.commands.registerCommand(`${this.appid}.updateAndLogPackage`, async () => {
+        this.extensionPath = context.extensionPath;
+        try {
+          await this.updatePackageAsync();
+          await this.logPackageAsync();
+        }
+        catch (reason) {
+          packagelogger.channel.appendLine("**** " + reason + " ****");
+        }
+      })
+    );
   }
 
   /** update package async */
