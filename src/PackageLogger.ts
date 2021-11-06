@@ -52,21 +52,25 @@ class PackageLogger {
 
     // init vscode
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.updatePackage`, () => {
+      vscode.commands.registerCommand(`${this.appid}.updatePackage`, async () => {
         this.extensionPath = context.extensionPath;
-        this.updatePackageAsync()
-          .catch(reason => {
-            packagelogger.channel.appendLine("**** " + reason + " ****");
-          });
+        try {
+          await this.updatePackageAsync();
+        }
+        catch (reason) {
+          packagelogger.channel.appendLine("**** " + reason + " ****");
+        }
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.logPackage`, () => {
+      vscode.commands.registerCommand(`${this.appid}.logPackage`, async () => {
         this.extensionPath = context.extensionPath;
-        this.logPackageAsync()
-          .catch(reason => {
-            packagelogger.channel.appendLine("**** " + reason + " ****");
-          });
+        try {
+          await this.logPackageAsync();
+        }
+        catch (reason) {
+          packagelogger.channel.appendLine("**** " + reason + " ****");
+        }
       })
     );
     context.subscriptions.push(
