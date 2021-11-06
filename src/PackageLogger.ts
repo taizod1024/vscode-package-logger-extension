@@ -52,21 +52,37 @@ class PackageLogger {
 
     // init vscode
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.updatePackage`, () => {
+      vscode.commands.registerCommand(`${this.appid}.updatePackage`, async () => {
         this.extensionPath = context.extensionPath;
-        this.updatePackageAsync()
-          .catch(reason => {
-            packagelogger.channel.appendLine("**** " + reason + " ****");
-          });
+        try {
+          await this.updatePackageAsync();
+        }
+        catch (reason) {
+          packagelogger.channel.appendLine("**** " + reason + " ****");
+        }
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.logPackage`, () => {
+      vscode.commands.registerCommand(`${this.appid}.logPackage`, async () => {
         this.extensionPath = context.extensionPath;
-        this.logPackageAsync()
-          .catch(reason => {
-            packagelogger.channel.appendLine("**** " + reason + " ****");
-          });
+        try {
+          await this.logPackageAsync();
+        }
+        catch (reason) {
+          packagelogger.channel.appendLine("**** " + reason + " ****");
+        }
+      })
+    );
+    context.subscriptions.push(
+      vscode.commands.registerCommand(`${this.appid}.updateAndLogPackage`, async () => {
+        this.extensionPath = context.extensionPath;
+        try {
+          await this.updatePackageAsync();
+          await this.logPackageAsync();
+        }
+        catch (reason) {
+          packagelogger.channel.appendLine("**** " + reason + " ****");
+        }
       })
     );
   }
@@ -80,9 +96,12 @@ class PackageLogger {
     this.channel.show();
 
     // exec command as administrator
-    let cmd = `powershell -command start-process 'cmd.exe' '/c ${this.extensionPath}\\src\\updatepackage.cmd' -verb runas`;
+    this.channel.appendLine(`[${this.timestamp()}] - update`);
+    let cmd = `powershell -command start-process 'cmd.exe' '/c ${this.extensionPath}\\bin\\updatepackage.cmd' -verb runas -wait`;
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     this.execCommand(cmd);
+
+    this.channel.appendLine(`[${this.timestamp()}] - done`);
   }
 
   /** log package async */
