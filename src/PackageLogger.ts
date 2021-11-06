@@ -80,9 +80,12 @@ class PackageLogger {
     this.channel.show();
 
     // exec command as administrator
-    let cmd = `powershell -command start-process 'cmd.exe' '/c ${this.extensionPath}\\src\\updatepackage.cmd' -verb runas`;
+    this.channel.appendLine(`[${this.timestamp()}] - update`);
+    let cmd = `powershell -command start-process 'cmd.exe' '/c ${this.extensionPath}\\bin\\updatepackage.cmd' -verb runas -wait`;
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     this.execCommand(cmd);
+
+    this.channel.appendLine(`[${this.timestamp()}] - done`);
   }
 
   /** log package async */
