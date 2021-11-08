@@ -5,6 +5,17 @@
     echo %CMDNAME%:
     echo.
 
+:UPDATE_WINDOWS
+
+    echo - windowsupdate
+    where abc-update 1>NUL 2>NUL
+    if %ERRORLEVEL% EQU 0 (
+        abc-update /a:install /s:wsus /r:n
+    ) else (
+        echo =^> not found
+    )
+    echo.
+
 :UPDATE_CHOCOLATEY
 
     echo - chocolatey
