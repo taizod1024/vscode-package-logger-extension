@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.1.4...v0.1.5) (2021-11-08)
+
+
+### Features
+
+* abc-updateでwindowsupdateを実行するよう修正 ([52ac038](https://github.com/taizod1024/vscode-package-logger-extension/commit/52ac03842c860050d3c905cb29542937ee118366))
+
 ### [0.1.4](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.1.3...v0.1.4) (2021-11-08)
 
 ### [0.1.3](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.1.2...v0.1.3) (2021-11-06)
