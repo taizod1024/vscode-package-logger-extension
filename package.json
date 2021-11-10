@@ -11,7 +11,6 @@
   ],
   "publisher": "taizod1024",
   "main": "./build/main.js",
-  "browser": "./build/main.js",
   "activationEvents": [
     "onCommand:package-logger.updatePackage",
     "onCommand:package-logger.logPackage",
