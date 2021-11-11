@@ -53,8 +53,10 @@ class PackageLogger {
     // init vscode
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.updatePackage`, async () => {
+        this.channel.show();
         this.extensionPath = context.extensionPath;
         try {
+          await this.checkProjectPathAsync();
           await this.updatePackageAsync();
         }
         catch (reason) {
@@ -64,8 +66,10 @@ class PackageLogger {
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.logPackage`, async () => {
+        this.channel.show();
         this.extensionPath = context.extensionPath;
         try {
+          await this.checkProjectPathAsync();
           await this.logPackageAsync();
         }
         catch (reason) {
@@ -75,8 +79,10 @@ class PackageLogger {
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.updateAndLogPackage`, async () => {
+        this.channel.show();
         this.extensionPath = context.extensionPath;
         try {
+          await this.checkProjectPathAsync();
           await this.updatePackageAsync();
           await this.logPackageAsync();
         }
@@ -87,13 +93,37 @@ class PackageLogger {
     );
   }
 
+  /** check project path */
+  public async checkProjectPathAsync() {
+
+    // check project path
+    this.projectPath = null;
+    if (vscode.workspace.workspaceFolders?.length !== 1) {
+      throw "ERROR: no root or multi root is not supported";
+    }
+    this.projectPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    this.appPath = `${this.projectPath}\\${this.appid}`;
+
+    // confirm make folder
+    if (!fs.existsSync(this.appPath)) {
+      let plchld = ` ${this.appid} FOLDER NOT FOUND, MAKE ${this.appid} FOLDER ?`;
+      let choice = `YES, MAKE ${this.appid} FOLDER.`;
+      return vscode.window.showQuickPick([choice], {
+        placeHolder: plchld
+      }).then(confirm => {
+        if (confirm !== choice) {
+          throw "CANCELED";
+        }
+      });
+    }
+  }
+
   /** update package async */
   public async updatePackageAsync() {
 
     // show channel
     this.channel.appendLine(`--------`);
     this.channel.appendLine(`[${this.timestamp()}] updatePackage:`);
-    this.channel.show();
 
     // exec command as administrator
     this.channel.appendLine(`[${this.timestamp()}] - update`);
@@ -110,14 +140,6 @@ class PackageLogger {
     // show channel
     this.channel.appendLine(`--------`);
     this.channel.appendLine(`[${this.timestamp()}] logPackage:`);
-    this.channel.show();
-
-    // check projectpath
-    this.projectPath = null;
-    if (vscode.workspace.workspaceFolders?.length !== 1) {
-      throw "ERROR: no root or multi root is not supported";
-    }
-    this.projectPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     this.channel.appendLine(`[${this.timestamp()}] - projectpath: ${this.projectPath}`);
 
     // check computername
@@ -422,7 +444,6 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}] - output`);
 
     // check apppath
-    this.appPath = `${this.projectPath}\\${this.appid}`;
     if (!fs.existsSync(this.appPath)) {
       fs.mkdirSync(this.appPath);
     }
