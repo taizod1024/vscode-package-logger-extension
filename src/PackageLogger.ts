@@ -160,6 +160,7 @@ class PackageLogger {
     await timeoutPromise(() => this.logVscode(machine));
     await timeoutPromise(() => this.logWinget(machine));
     await timeoutPromise(() => this.logScoop(machine));
+    await timeoutPromise(() => this.logGit(machine));
 
     // output log
     this.outputLog(machine);
@@ -296,7 +297,7 @@ class PackageLogger {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - chocolatey`);
 
-    // show command
+    // show list command
     let cmd = "choco list --local-only";
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
@@ -327,6 +328,12 @@ class PackageLogger {
         machine.package.chocolatey[name] = value;
       }
     }
+
+    // show config command
+    cmd = "choco config list";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    text = this.execCommand(cmd);
+    machine.package.chocolatey._config = text;
   }
 
   /** log nodejs */
@@ -335,7 +342,7 @@ class PackageLogger {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - nodejs`);
 
-    // show command
+    // show list command
     let cmd = "npm list --global";
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
@@ -362,6 +369,12 @@ class PackageLogger {
         machine.package.nodejs[name] = value;
       }
     }
+
+    // show config command
+    cmd = "npm config list";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    text = this.execCommand(cmd);
+    machine.package.nodejs._config = text;
   }
 
   /** log python */
@@ -370,7 +383,7 @@ class PackageLogger {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - python`);
 
-    // show command
+    // show list command
     let cmd = "pip list";
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
@@ -391,6 +404,12 @@ class PackageLogger {
         machine.package.python[name] = value;
       }
     }
+
+    // show config command
+    cmd = "pip config list";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    text = this.execCommand(cmd);
+    machine.package.python._config = text;
   }
 
   /** log vscode */
@@ -399,7 +418,7 @@ class PackageLogger {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - vscode`);
 
-    // show command
+    // show list command
     let cmd = "code --list-extensions --show-versions";
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
@@ -436,6 +455,24 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}] - scoop`);
     this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
 
+  }
+
+  /** log git */
+  public logGit(machine: any) {
+
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - git`);
+
+    // show config command
+    let cmd = "git config --list";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    let text = this.execCommand(cmd);
+    if (!text) {
+      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
+      return;
+    }
+    machine.package.git = {};
+    machine.package.git._config = text;
   }
 
   //** output log */
