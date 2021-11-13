@@ -1,6 +1,6 @@
 # package-logger
 
-Output Windows application and package list with version.
+Output Windows application, package list with version and config.
 Use it with Git.
 
 - package-logger
@@ -8,6 +8,10 @@ Use it with Git.
     - system information  
       ```
       systeminfo
+      ```
+    - windows features
+      ```
+      dism /Online /Get-Features /English
       ```
     - environment variables
   - package
@@ -17,19 +21,26 @@ Use it with Git.
       reg query HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall /s
       reg query HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall /s
       ```
-    - [chocolatey](https://chocolatey.org/) package list  
+    - chocolatey package list and config
       ```
       choco list --local-only
+      choco config list
       ```
-    - [nodejs](https://www.npmjs.com/) package list  
+    - nodejs package list and config
       ```
       npm list --global
+      npm config list
       ```
-    - [python](https://pypi.org/) package list  
+    - python package list and config
       ```
       pip list
+      pip config list
       ```
-    - [vscode](https://marketplace.visualstudio.com/vscode) extension list  
+    - vscode extension list  
       ```
       code --list-extensions -show-versions
+      ```
+   - git config
+      ```
+      git config --list
       ```
