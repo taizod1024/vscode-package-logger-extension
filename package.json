@@ -1,5 +1,5 @@
 {
-  "version": "0.1.9",
+  "version": "0.2.0",
   "name": "package-logger",
   "displayName": "Package Logger",
   "description": "windows package logger",
@@ -12,7 +12,7 @@
   "publisher": "taizod1024",
   "main": "./build/main.js",
   "activationEvents": [
-      "onCommand:package-logger.updateAndLogPackage"
+    "onCommand:package-logger.updateAndLogPackage"
   ],
   "contributes": {
     "commands": [
