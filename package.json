@@ -12,20 +12,10 @@
   "publisher": "taizod1024",
   "main": "./build/main.js",
   "activationEvents": [
-      "onCommand:package-logger.updatePackage",
-      "onCommand:package-logger.logPackage",
       "onCommand:package-logger.updateAndLogPackage"
   ],
   "contributes": {
     "commands": [
-      {
-        "command": "package-logger.logPackage",
-        "title": "Package Logger: Log Package"
-      },
-      {
-        "command": "package-logger.updatePackage",
-        "title": "Package Logger: Update Package"
-      },
       {
         "command": "package-logger.updateAndLogPackage",
         "title": "Package Logger: Update and Log Package"

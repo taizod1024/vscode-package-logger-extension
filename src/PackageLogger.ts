@@ -152,6 +152,7 @@ class PackageLogger {
     // log any
     let machine: any = { os: {}, package: {} };
     await timeoutPromise(() => this.logSysteminfo(machine));
+    await timeoutPromise(() => this.logWindowsFeatures(machine));
     await timeoutPromise(() => this.logEnv(machine));
     await timeoutPromise(() => this.logApp(machine));
     await timeoutPromise(() => this.logChocolatey(machine));
@@ -179,7 +180,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(`chcp 65001 1>NUL && ${cmd}`);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
       return;
     }
 
@@ -237,6 +238,23 @@ class PackageLogger {
     }
   }
 
+  /** log windows features */
+  public logWindowsFeatures(machine: any) {
+
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - windows features`);
+    this.channel.appendLine(`[${this.timestamp()}]   $ dism /Online /Get-Features /English`);
+
+    let path = `${process.env.TMP}\\package-logger_windowsfeatures.txt`;
+    if (!fs.existsSync(path)) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+    } else {
+      let text = fs.readFileSync(path);
+      machine.os.system.windowsfeatures = text;
+      fs.unlinkSync(path);
+    }
+  }
+
   /** log app */
   public logApp(machine: any) {
 
@@ -257,7 +275,7 @@ class PackageLogger {
     text += (this.execCommand(`chcp 65001 1>NUL && ${cmd3}`) || "") + "\r\n";
     text += "HKEY"; // for sentinel
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
       return;
     }
 
@@ -302,7 +320,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
       return;
     }
 
@@ -347,7 +365,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
       return;
     }
 
@@ -388,7 +406,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
       return;
     }
 
@@ -423,7 +441,7 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
       return;
     }
 
@@ -468,11 +486,11 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     let text = this.execCommand(cmd);
     if (!text) {
-      this.channel.appendLine(`[${this.timestamp()}]   => not found`);
-      return;
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+    } else {
+      machine.package.git = {};
+      machine.package.git._config = text;
     }
-    machine.package.git = {};
-    machine.package.git._config = text;
   }
 
   //** output log */
