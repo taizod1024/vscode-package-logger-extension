@@ -72,6 +72,17 @@
     echo   =^> not implemented
     echo.
 
+:LOG_WINDOWS_FEATURES
+
+    echo - windows features
+    del %TMP%\package-logger_windows_features.txt 1>NUL 2>NUL
+    for /F "tokens=1,2,3,4" %%i in ('dism /Online /Get-Features /English') do (
+        if "%%i" equ "Feature" set NAME=%%l
+        if "%%k" equ "Enabled" echo [x] !NAME! >> %TMP%\package-logger_windowsfeatures.txt
+        if "%%k" equ "Disabled" echo [ ] !NAME! >> %TMP%\package-logger_windowsfeatures.txt
+    )
+    echo.
+    
 :EXIT
 
     echo - done
