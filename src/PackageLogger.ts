@@ -52,32 +52,6 @@ class PackageLogger {
 
     // init vscode
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.updatePackage`, async () => {
-        this.channel.show();
-        this.extensionPath = context.extensionPath;
-        try {
-          await this.checkProjectPathAsync();
-          await this.updatePackageAsync();
-        }
-        catch (reason) {
-          packagelogger.channel.appendLine("**** " + reason + " ****");
-        }
-      })
-    );
-    context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.logPackage`, async () => {
-        this.channel.show();
-        this.extensionPath = context.extensionPath;
-        try {
-          await this.checkProjectPathAsync();
-          await this.logPackageAsync();
-        }
-        catch (reason) {
-          packagelogger.channel.appendLine("**** " + reason + " ****");
-        }
-      })
-    );
-    context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.updateAndLogPackage`, async () => {
         this.channel.show();
         this.extensionPath = context.extensionPath;
@@ -109,7 +83,8 @@ class PackageLogger {
       let plchld = ` ${this.appid} FOLDER NOT FOUND, MAKE ${this.appid} FOLDER ?`;
       let choice = `YES, MAKE ${this.appid} FOLDER.`;
       return vscode.window.showQuickPick([choice], {
-        placeHolder: plchld
+        placeHolder: plchld,
+        ignoreFocusOut: true
       }).then(confirm => {
         if (confirm !== choice) {
           throw "CANCELED";
@@ -249,9 +224,13 @@ class PackageLogger {
     if (!fs.existsSync(path)) {
       this.channel.appendLine(`[${this.timestamp()}]     => not found`);
     } else {
-      let text = fs.readFileSync(path);
-      machine.os.system.windowsfeatures = text;
+      let text = fs.readFileSync(path).toString().trim();
+      let lines = text.split(/[\r\n]+/).map(val => val.trim()).filter(val => val);
       fs.unlinkSync(path);
+      machine.os.feature ={};
+      for (const line of lines) {
+        machine.os.feature[line] = line;
+      }
     }
   }
 
@@ -295,12 +274,14 @@ class PackageLogger {
       if (line.startsWith("HKEY") && displayname) {
 
         let name;
-        if (!displayversion) {
-          name = displayname; // name without version
-        } else {
-          name = `${displayname}@${displayversion}`; // name with version
-        }
         let value = name;
+        if (!displayversion) {
+          name = displayname;
+          value = displayname;;
+        } else {
+          name = displayname;
+          value = `${displayname}@${displayversion}`;
+        }
         machine.package.app[name] = value;
 
         displayname = null;
@@ -340,8 +321,8 @@ class PackageLogger {
 
       let word = line.split(/ +/);
       if (word.length !== 2) continue; // check name and version
-      let name = word.join("@"); // name with version
-      let value = name;
+      let name = word[0];
+      let value = word.join("@");
       if (name && value) {
         machine.package.chocolatey[name] = value;
       }
@@ -381,8 +362,9 @@ class PackageLogger {
       if (line.startsWith(" Features? Learn more about Package Synchronizer at")) continue;
       if (line.startsWith(" https://chocolatey.org/compare")) continue;
 
-      let name = line.split(/[ @]/).slice(1).join("@"); // delete first word and get name
-      let value = name;
+      let word = line.split(/[ @]/).slice(1);
+      let name = word[0];
+      let value = word.join("@");
       if (name && value) {
         machine.package.nodejs[name] = value;
       }
@@ -416,8 +398,9 @@ class PackageLogger {
     lines.shift(); // delete first line
     lines.shift(); // delete second line
     for (const line of lines) {
-      let name = line.split(/ +/).join("@"); // name with version
-      let value = name;
+      let word = line.split(/ +/);
+      let name = word[0];
+      let value = word.join("@");
       if (name && value) {
         machine.package.python[name] = value;
       }
@@ -449,8 +432,9 @@ class PackageLogger {
     machine.package.vscode = {};
     let lines = text.split(/[\r\n]+/);
     for (const line of lines) {
-      let name = line; // name with version
-      let value = name;
+      let word = line.split("@");
+      let name = word[0];
+      let value = line;
       if (name && value) {
         machine.package.vscode[name] = value;
       }
