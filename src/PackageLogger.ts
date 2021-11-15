@@ -128,6 +128,7 @@ class PackageLogger {
     let machine: any = { os: {}, package: {} };
     await timeoutPromise(() => this.logSysteminfo(machine));
     await timeoutPromise(() => this.logFeature(machine));
+    await timeoutPromise(() => this.logService(machine));
     await timeoutPromise(() => this.logEnv(machine));
     await timeoutPromise(() => this.logApp(machine));
     await timeoutPromise(() => this.logChocolatey(machine));
@@ -186,7 +187,6 @@ class PackageLogger {
 
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - environment variables`);
-    this.channel.appendLine(`[${this.timestamp()}]   - environment variables inherited from the parent process`);
 
     // name to be excluded because of context
     let excludes = [
@@ -234,6 +234,29 @@ class PackageLogger {
     }
   }
 
+  /** log service */
+  public logService(machine: any) {
+
+    // show channel
+    this.channel.appendLine(`[${this.timestamp()}] - service`);
+    this.channel.appendLine(`[${this.timestamp()}]   $ powershell -command "Get-Service"`);
+
+    let path = `${process.env.TMP}\\package-logger_service.txt`;
+    if (!fs.existsSync(path)) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+    } else {
+      let text = fs.readFileSync(path).toString().trim();
+      let lines = text.split(/[\r\n]+/).map(val => val.trim()).filter(val => val);
+      fs.unlinkSync(path);
+      machine.os.service ={};
+      for (const line of lines) {
+        let words = line.split(/:/);
+        let name = words[0];
+        machine.os.service[name] = line;
+      }
+    }
+  }
+
   /** log app */
   public logApp(machine: any) {
 
@@ -267,9 +290,9 @@ class PackageLogger {
     let displayversion = null;
     for (const line of lines) {
 
-      let word = line.trim().split(/ +/);
-      if (word[0] === "DisplayName") displayname = word.slice(2).join(" ");
-      if (word[0] === "DisplayVersion") displayversion = word[2];
+      let words = line.trim().split(/ +/);
+      if (words[0] === "DisplayName") displayname = words.slice(2).join(" ");
+      if (words[0] === "DisplayVersion") displayversion = words[2];
 
       if (line.startsWith("HKEY") && displayname) {
 
@@ -319,10 +342,10 @@ class PackageLogger {
       if (line.startsWith("   being ignored due to the current command being used 'list'.")) continue;
       if (line.startsWith("   It is recommended that you reboot at your earliest convenience.")) continue;
 
-      let word = line.split(/ +/);
-      if (word.length !== 2) continue; // check name and version
-      let name = word[0];
-      let value = word.join("@");
+      let words = line.split(/ +/);
+      if (words.length !== 2) continue; // check name and version
+      let name = words[0];
+      let value = words.join("@");
       if (name && value) {
         machine.package.chocolatey[name] = value;
       }
@@ -362,9 +385,9 @@ class PackageLogger {
       if (line.startsWith(" Features? Learn more about Package Synchronizer at")) continue;
       if (line.startsWith(" https://chocolatey.org/compare")) continue;
 
-      let word = line.split(/[ @]/).slice(1);
-      let name = word[0];
-      let value = word.join("@");
+      let words = line.split(/[ @]/).slice(1);
+      let name = words[0];
+      let value = words.join("@");
       if (name && value) {
         machine.package.nodejs[name] = value;
       }
@@ -398,9 +421,9 @@ class PackageLogger {
     lines.shift(); // delete first line
     lines.shift(); // delete second line
     for (const line of lines) {
-      let word = line.split(/ +/);
-      let name = word[0];
-      let value = word.join("@");
+      let words = line.split(/ +/);
+      let name = words[0];
+      let value = words.join("@");
       if (name && value) {
         machine.package.python[name] = value;
       }
@@ -432,8 +455,8 @@ class PackageLogger {
     machine.package.vscode = {};
     let lines = text.split(/[\r\n]+/);
     for (const line of lines) {
-      let word = line.split("@");
-      let name = word[0];
+      let words = line.split("@");
+      let name = words[0];
       let value = line;
       if (name && value) {
         machine.package.vscode[name] = value;
