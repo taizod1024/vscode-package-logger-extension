@@ -127,7 +127,7 @@ class PackageLogger {
     // log any
     let machine: any = { os: {}, package: {} };
     await timeoutPromise(() => this.logSysteminfo(machine));
-    await timeoutPromise(() => this.logWindowsFeatures(machine));
+    await timeoutPromise(() => this.logFeature(machine));
     await timeoutPromise(() => this.logEnv(machine));
     await timeoutPromise(() => this.logApp(machine));
     await timeoutPromise(() => this.logChocolatey(machine));
@@ -213,14 +213,14 @@ class PackageLogger {
     }
   }
 
-  /** log windows features */
-  public logWindowsFeatures(machine: any) {
+  /** log feature */
+  public logFeature(machine: any) {
 
     // show channel
-    this.channel.appendLine(`[${this.timestamp()}] - windows features`);
+    this.channel.appendLine(`[${this.timestamp()}] - feature`);
     this.channel.appendLine(`[${this.timestamp()}]   $ dism /Online /Get-Features /English`);
 
-    let path = `${process.env.TMP}\\package-logger_windowsfeatures.txt`;
+    let path = `${process.env.TMP}\\package-logger_feature.txt`;
     if (!fs.existsSync(path)) {
       this.channel.appendLine(`[${this.timestamp()}]     => not found`);
     } else {
