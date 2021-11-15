@@ -1,8 +1,11 @@
     @echo off
     setlocal enabledelayedexpansion
 
+    set TMP=%1
+
     set CMDNAME=%~nx0
     echo %CMDNAME%:
+    echo - TMP: %TMP%
     echo.
 
 :UPDATE_WINDOWS
