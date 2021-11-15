@@ -52,32 +52,6 @@ class PackageLogger {
 
     // init vscode
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.updatePackage`, async () => {
-        this.channel.show();
-        this.extensionPath = context.extensionPath;
-        try {
-          await this.checkProjectPathAsync();
-          await this.updatePackageAsync();
-        }
-        catch (reason) {
-          packagelogger.channel.appendLine("**** " + reason + " ****");
-        }
-      })
-    );
-    context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.logPackage`, async () => {
-        this.channel.show();
-        this.extensionPath = context.extensionPath;
-        try {
-          await this.checkProjectPathAsync();
-          await this.logPackageAsync();
-        }
-        catch (reason) {
-          packagelogger.channel.appendLine("**** " + reason + " ****");
-        }
-      })
-    );
-    context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appid}.updateAndLogPackage`, async () => {
         this.channel.show();
         this.extensionPath = context.extensionPath;
@@ -109,7 +83,8 @@ class PackageLogger {
       let plchld = ` ${this.appid} FOLDER NOT FOUND, MAKE ${this.appid} FOLDER ?`;
       let choice = `YES, MAKE ${this.appid} FOLDER.`;
       return vscode.window.showQuickPick([choice], {
-        placeHolder: plchld
+        placeHolder: plchld,
+        ignoreFocusOut: true
       }).then(confirm => {
         if (confirm !== choice) {
           throw "CANCELED";
