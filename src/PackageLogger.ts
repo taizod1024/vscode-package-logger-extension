@@ -225,7 +225,7 @@ class PackageLogger {
       this.channel.appendLine(`[${this.timestamp()}]     => not found`);
     } else {
       let text = fs.readFileSync(path).toString().trim();
-      let lines = text.split(/[\r\n]+/).map(val => val.trim()).filter(val => val);;
+      let lines = text.split(/[\r\n]+/).map(val => val.trim()).filter(val => val);
       fs.unlinkSync(path);
       machine.os.feature ={};
       for (const line of lines) {
