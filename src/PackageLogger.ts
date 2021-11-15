@@ -249,9 +249,13 @@ class PackageLogger {
     if (!fs.existsSync(path)) {
       this.channel.appendLine(`[${this.timestamp()}]     => not found`);
     } else {
-      let text = fs.readFileSync(path);
-      machine.os.system.windowsfeatures = text;
+      let text = fs.readFileSync(path).toString().trim();
+      let lines = text.split(/[\r\n]+/).map(val => val.trim()).filter(val => val);;
       fs.unlinkSync(path);
+      machine.os.feature ={};
+      for (const line of lines) {
+        machine.os.feature[line] = line;
+      }
     }
   }
 
