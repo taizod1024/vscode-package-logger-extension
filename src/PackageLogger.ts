@@ -396,6 +396,15 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     text = this.execCommand(cmd);
     machine.package.nodejs._config = text;
+
+    // show nvm command
+    cmd = "nvm list";
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
+    text = this.execCommand(cmd);
+    if (!text) {
+      this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+    }
+    machine.package.nodejs._nvm = text;
   }
 
   /** log python */
