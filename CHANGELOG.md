@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.3](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.2...v0.3.3) (2021-11-18)
+
+
+### Features
+
+* nvm listを追加 ([16bf21a](https://github.com/taizod1024/vscode-package-logger-extension/commit/16bf21ad695ce2fc5962b2f7a507d7a6a547161a))
+
+
+### Bug Fixes
+
+* nvmがない場合の処理を修正 ([6e80fcf](https://github.com/taizod1024/vscode-package-logger-extension/commit/6e80fcf568be4cc839f5aca22ccb7ea7a251a2cd))
+
 ### [0.3.2](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.1...v0.3.2) (2021-11-15)
 
 
