@@ -135,8 +135,6 @@ class PackageLogger {
     await timeoutPromise(() => this.logNodejs(machine));
     await timeoutPromise(() => this.logPython(machine));
     await timeoutPromise(() => this.logVscode(machine));
-    await timeoutPromise(() => this.logWinget(machine));
-    await timeoutPromise(() => this.logScoop(machine));
     await timeoutPromise(() => this.logGit(machine));
 
     // output log
@@ -462,24 +460,6 @@ class PackageLogger {
         machine.package.vscode[name] = value;
       }
     }
-  }
-
-  /** log winget */
-  public logWinget(_machine: any) {
-
-    // show channel
-    this.channel.appendLine(`[${this.timestamp()}] - winget`);
-    this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
-
-  }
-
-  /** log scoop */
-  public logScoop(_machine: any) {
-
-    // show channel
-    this.channel.appendLine(`[${this.timestamp()}] - scoop`);
-    this.channel.appendLine(`[${this.timestamp()}]   => not implemented`);
-
   }
 
   /** log git */
