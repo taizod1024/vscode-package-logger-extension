@@ -400,11 +400,12 @@ class PackageLogger {
     // show nvm command
     cmd = "nvm list";
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
-    text = this.execCommand(cmd);
+    text = this.execCommand(cmd, false);
     if (!text) {
       this.channel.appendLine(`[${this.timestamp()}]     => not found`);
+    } else {
+      machine.package.nodejs._nvm = text;
     }
-    machine.package.nodejs._nvm = text;
   }
 
   /** log python */
@@ -528,11 +529,12 @@ class PackageLogger {
   }
 
   /** execute command */
-  public execCommand(cmd: string): string {
+  public execCommand(cmd: string, trim = true): string {
     let text = null;
     try {
       const options = { cwd: this.projectPath, };
-      text = child_process.execSync(cmd, options).toString().trim();
+      text = child_process.execSync(cmd, options).toString();
+      if (trim) text= text.trim();
     }
     catch (ex) {
     }
