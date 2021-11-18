@@ -63,18 +63,6 @@
     )
     echo.
 
-:UPDATE_WINGET
-
-    echo - winget
-    echo   =^> not implemented
-    echo.
-
-:UPDATE_SCOOP
-
-    echo - scoop
-    echo   =^> not implemented
-    echo.
-
 :LOG_FEATURE
 
     echo - feature
