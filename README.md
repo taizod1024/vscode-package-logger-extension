@@ -30,6 +30,7 @@ Use it with Git.
       ```
       npm list --global
       npm config list
+      nvm list
       ```
     - python package list and config
       ```
@@ -40,7 +41,7 @@ Use it with Git.
       ```
       code --list-extensions -show-versions
       ```
-   - git config
+    - git config
       ```
       git config --list
       ```
