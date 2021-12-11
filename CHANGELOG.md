@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.5](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.4...v0.3.5) (2021-12-11)
+
+
+### Bug Fixes
+
+* 不要文字削除後にエラー  [#5](https://github.com/taizod1024/vscode-package-logger-extension/issues/5) npm list の階層表示に対応 ([6abde9a](https://github.com/taizod1024/vscode-package-logger-extension/commit/6abde9a61f47639312379a2f68c73384e59e4639))
+
 ### [0.3.4](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.3...v0.3.4) (2021-11-19)
 
 ### [0.3.3](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.2...v0.3.3) (2021-11-18)
