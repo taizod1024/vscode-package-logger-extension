@@ -225,7 +225,7 @@ class PackageLogger {
       let text = fs.readFileSync(path).toString().trim();
       let lines = text.split(/[\r\n]+/).map(val => val.trim()).filter(val => val);
       fs.unlinkSync(path);
-      machine.os.feature ={};
+      machine.os.feature = {};
       for (const line of lines) {
         machine.os.feature[line] = line;
       }
@@ -246,7 +246,7 @@ class PackageLogger {
       let text = fs.readFileSync(path).toString().trim();
       let lines = text.split(/[\r\n]+/).map(val => val.trim()).filter(val => val);
       fs.unlinkSync(path);
-      machine.os.service ={};
+      machine.os.service = {};
       for (const line of lines) {
         let words = line.split(/:/);
         let name = words[0];
@@ -384,8 +384,15 @@ class PackageLogger {
       if (line.startsWith(" https://chocolatey.org/compare")) continue;
 
       let words = line.split(/[ @]/).slice(1);
-      let name = words[0];
-      let value = words.join("@");
+      let name;
+      let value;
+      if (words[words.length - 1] == "deduped") {
+        name = words[words.length - 3];
+        value = words[words.length - 3] + "@" + words[words.length - 2] + " " + words[words.length - 1];
+      } else {
+        name = words[words.length - 2];
+        value = words[words.length - 2] + "@" + words[words.length - 1];
+      }
       if (name && value) {
         machine.package.nodejs[name] = value;
       }
@@ -534,7 +541,7 @@ class PackageLogger {
     try {
       const options = { cwd: this.projectPath, };
       text = child_process.execSync(cmd, options).toString();
-      if (trim) text= text.trim();
+      if (trim) text = text.trim();
     }
     catch (ex) {
     }
