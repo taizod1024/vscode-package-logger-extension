@@ -2,12 +2,16 @@
   "version": "0.0.0",
   "name": "package-logger",
   "displayName": "Package Logger",
-  "description": "windows package logger",
+  "description": "package logger extension for windows",
   "engines": {
     "vscode": "^1.61.0"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "package",
+    "log"
   ],
   "publisher": "taizod1024",
   "main": "./build/main.js",
