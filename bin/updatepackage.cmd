@@ -88,6 +88,13 @@
 
 :EXIT
 
-    echo - done
-    timeout 5
-    exit /b 0
+    tasklist /FI "IMAGENAME eq code.exe" | findstr code.exe 1>NUL 2>NUL
+    if %ERRORLEVEL% EQU  0 (
+        echo - done
+        timeout 5
+        exit /b 0
+    ) else (
+        echo - done. but vscode missing, please start vscode.
+        pause
+        exit /b 1
+    )
