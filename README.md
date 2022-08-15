@@ -13,6 +13,10 @@ Use it with Git.
       ```
       dism /Online /Get-Features /English
       ```
+    - windows services
+      ```
+      powershell -command "Get-Service"
+      ```
     - environment variables
   - package
     - windows application list  
