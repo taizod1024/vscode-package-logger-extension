@@ -88,7 +88,7 @@
 
 :EXIT
 
-    tasklist /FI "IMAGENAME eq code.exe" | findstr code.exe 1>NUL 2>NUL
+    tasklist /FI "IMAGENAME eq Code.exe" | findstr Code.exe 1>NUL 2>NUL
     if %ERRORLEVEL% EQU  0 (
         echo - done
         timeout 5
