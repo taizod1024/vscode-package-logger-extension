@@ -369,17 +369,10 @@ class PackageLogger {
       if (line.startsWith(" Features? Learn more about Package Synchronizer at")) continue;
       if (line.startsWith(" https://chocolatey.org/compare")) continue;
 
-      let words = line.split(/[ @]/).slice(1);
-      let name;
-      let value;
-      if (words[words.length - 1] === "deduped") {
-        name = words[words.length - 3];
-        value = words[words.length - 3] + "@" + words[words.length - 2] + " " + words[words.length - 1];
-      } else {
-        name = words[words.length - 2];
-        value = words[words.length - 2] + "@" + words[words.length - 1];
-      }
-      if (name && value) {
+      let match = line.match(/ (([^ ]+)@[^ ]+)/);
+      if (match) {
+        let name = match[2];
+        let value = match[1];
         machine.package.nodejs[name] = value;
       }
     }
@@ -464,6 +457,7 @@ class PackageLogger {
 
     // settings.json
     let paths = `${process.env.APPDATA}\\Code\\User\\settings.json`;
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${paths}`);
     if (!fs.existsSync(paths)) {
       this.channel.appendLine(`[${this.timestamp()}]     => settings.json not found`);
     } else {
@@ -473,6 +467,7 @@ class PackageLogger {
 
     // keybindings.json
     let pathk = `${process.env.APPDATA}\\Code\\User\\keybindings.json`;
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${pathk}`);
     if (!fs.existsSync(pathk)) {
       this.channel.appendLine(`[${this.timestamp()}]     => keybindings.json not found`);
     } else {

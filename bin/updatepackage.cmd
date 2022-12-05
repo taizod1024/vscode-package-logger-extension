@@ -95,6 +95,7 @@
         exit /b 0
     ) else (
         echo - done. but vscode missing, please start vscode.
+        echo.
         pause
         exit /b 1
     )
