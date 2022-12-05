@@ -462,13 +462,22 @@ class PackageLogger {
       }
     }
 
-    // vscode
-    let path = `${process.env.APPDATA}\\Code\\User\\settings.json`;
-    if (!fs.existsSync(path)) {
+    // settings.json
+    let paths = `${process.env.APPDATA}\\Code\\User\\settings.json`;
+    if (!fs.existsSync(paths)) {
       this.channel.appendLine(`[${this.timestamp()}]     => settings.json not found`);
     } else {
-      let text = fs.readFileSync(path);
+      let text = fs.readFileSync(paths);
       machine.package.vscode["_settings.json"] = text;
+    }
+
+    // keybindings.json
+    let pathk = `${process.env.APPDATA}\\Code\\User\\keybindings.json`;
+    if (!fs.existsSync(pathk)) {
+      this.channel.appendLine(`[${this.timestamp()}]     => keybindings.json not found`);
+    } else {
+      let text = fs.readFileSync(pathk);
+      machine.package.vscode["_keybindings.json"] = text;
     }
   }
 
