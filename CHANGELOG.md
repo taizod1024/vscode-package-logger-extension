@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.14](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.13...v0.3.14) (2022-12-05)
+
+
+### Bug Fixes
+
+* npmパッケージ名修正 ([0573859](https://github.com/taizod1024/vscode-package-logger-extension/commit/057385959b5c448ec34f0e5ab4ad862a6dcc4bbc))
+
 ### [0.3.13](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.12...v0.3.13) (2022-12-05)
 
 
