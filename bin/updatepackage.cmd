@@ -15,7 +15,7 @@
     if %ERRORLEVEL% EQU 0 (
         abc-update /a:install /s:wsus /r:n
     ) else (
-        echo   =^> not found
+        echo   =^> abc-update not found, install 
     )
     echo.
 
@@ -26,7 +26,7 @@
     if %ERRORLEVEL% EQU 0 (
         choco upgrade all
     ) else (
-        echo   =^> not found
+        echo   =^> chocolatey not found
     )
     echo.
 
@@ -37,18 +37,18 @@
     if %ERRORLEVEL% EQU  0 (
         call npm update -g
     ) else (
-        echo   =^> not found
+        echo   =^> npm not found
     )
     echo.
 
 :UPDATE_PYTHON
 
-    echo - python
+    echo - python3
     where python 1>NUL 2>NUL
     if %ERRORLEVEL% EQU  0 (
-        python -m pip install --upgrade pip
+        python3 -m pip install --upgrade pip
     ) else (
-        echo   =^> not found
+        echo   =^> python3 not found
     )
     echo.
 
@@ -59,7 +59,7 @@
     if %ERRORLEVEL% EQU  0 (
         for /F "usebackq tokens=1" %%I in (`code --list-extensions`) do call code --install-extension %%I --force
     ) else (
-        echo   =^> not found
+        echo   =^> vscode not found
     )
     echo.
 
