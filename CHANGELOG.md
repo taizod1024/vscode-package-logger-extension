@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.13](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.12...v0.3.13) (2022-12-05)
+
+
+### Features
+
+* vscodeのkeybindings.jsonを記録 ([e8e13a4](https://github.com/taizod1024/vscode-package-logger-extension/commit/e8e13a4cdce976d0c000841aaf96c867b8b3b635))
+
 ### [0.3.12](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.11...v0.3.12) (2022-12-05)
 
 
