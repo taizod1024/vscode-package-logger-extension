@@ -340,7 +340,7 @@ class PackageLogger {
     cmd = "choco config list";
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     text = this.execCommand(cmd);
-    machine.package.chocolatey._config = text;
+    machine.package.chocolatey._choco_config_list = text;
   }
 
   /** log nodejs */
@@ -388,7 +388,7 @@ class PackageLogger {
     cmd = "npm config list";
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     text = this.execCommand(cmd);
-    machine.package.nodejs._config = text;
+    machine.package.nodejs._npm_config_list = text;
 
     // show nvm command
     cmd = "nvm list";
@@ -397,7 +397,7 @@ class PackageLogger {
     if (!text) {
       this.channel.appendLine(`[${this.timestamp()}]     => nvm not found`);
     } else {
-      machine.package.nodejs._nvm = text;
+      machine.package.nodejs._nvm_list = text;
     }
   }
 
@@ -433,7 +433,7 @@ class PackageLogger {
     cmd = "pip config list";
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     text = this.execCommand(cmd);
-    machine.package.python._config = text;
+    machine.package.python._pip_config_list = text;
   }
 
   /** log vscode */
@@ -461,6 +461,15 @@ class PackageLogger {
         machine.package.vscode[name] = value;
       }
     }
+
+    // vscode
+    let path = `${process.env.APPDATA}\\Code\\User\\settings.json`;
+    if (!fs.existsSync(path)) {
+      this.channel.appendLine(`[${this.timestamp()}]     => settings.json not found`);
+    } else {
+      let text = fs.readFileSync(path);
+      machine.package.vscode["_settings.json"] = text;
+    }
   }
 
   /** log git */
@@ -476,7 +485,7 @@ class PackageLogger {
       this.channel.appendLine(`[${this.timestamp()}]     => git not found`);
     } else {
       machine.package.git = {};
-      machine.package.git._config = text;
+      machine.package.git._git_config_list = text;
     }
   }
 
