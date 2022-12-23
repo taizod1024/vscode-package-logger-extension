@@ -8,7 +8,9 @@
     echo - TMP: %TMP%
     echo.
 
-:UPDATE_WINDOWS
+    goto :LOG_OS_FEATURE
+
+:UPDATE_OS
 
     echo - windowsupdate
     where abc-update 1>NUL 2>NUL
@@ -19,7 +21,7 @@
     )
     echo.
 
-:UPDATE_CHOCOLATEY
+:UPDATE_PKG_CHOCOLATEY
 
     echo - chocolatey
     where choco 1>NUL 2>NUL
@@ -30,7 +32,7 @@
     )
     echo.
 
-:UPDATE_NODEJS
+:UPDATE_PKG_NODEJS
 
     echo - nodejs
     where npm 1>NUL 2>NUL
@@ -41,7 +43,7 @@
     )
     echo.
 
-:UPDATE_PYTHON
+:UPDATE_PKG_PYTHON
 
     echo - python3
     where python 1>NUL 2>NUL
@@ -52,7 +54,7 @@
     )
     echo.
 
-:UPDATE_VSCODE
+:UPDATE_PKG_VSCODE
 
     echo - vscode
     where code 1>NUL 2>NUL
@@ -63,27 +65,62 @@
     )
     echo.
 
-:LOG_FEATURE
+:LOG_OS_FEATURE
 
     echo - feature
-    del %TMP%\package-logger_feature.txt 1>NUL 2>NUL
+    del %TMP%\package-logger_os_feature.txt 1>NUL 2>NUL
     for /F "tokens=1,2,3,4" %%i in ('dism /Online /Get-Features /English') do (
         if "%%i" equ "Feature" set NAME=%%l
         if "%%k" equ "Enabled" (
             echo !NAME!
-            echo !NAME!>> %TMP%\package-logger_feature.txt
+            echo !NAME!>> %TMP%\package-logger_os_feature.txt
         )
     )
     echo.
 
-:LOG_SERVICE
+:LOG_OS_SERVICE
 
     echo - service
-    del %TMP%\package-logger_service.txt 1>NUL 2>NUL
+    del %TMP%\package-logger_os_service.txt 1>NUL 2>NUL
     for /F "tokens=1,2" %%i in ('powershell -command "Get-Service | Where-Object { -not ($_.ServiceType -match '^[0-9]+$') } | Select-Object -property StartType, Name | Select-Object Name, StartType | Format-Table -HideTableHeaders"') do (
         echo %%i: %%j
-        echo %%i: %%j>> %TMP%\package-logger_service.txt
+        echo %%i: %%j>> %TMP%\package-logger_os_service.txt
     )
+    echo.
+
+:LOG_OS_SYSTEM_STARTUP
+
+    echo - startup
+    del %TMP%\package-logger_os_startup.txt 1>NUL 2>NUL
+    dir /b "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"         >> %TMP%\package-logger_os_startup.txt
+    dir /b "%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\StartUp" >> %TMP%\package-logger_os_startup.txt
+    echo.
+
+:LOG_OS_SYSTEM_ASSOC
+
+    echo - assoc
+    del %TMP%\package-logger_os_system_assoc.xml 1>NUL 2>NUL
+    Dism /Online /Export-DefaultAppAssociations:%TMP%\package-logger_os_system_assoc.xml 1>NUL 2>NUL
+    echo.
+
+:LOG_OS_SYSTEM_STARTMENU
+
+    echo - startmenu
+    del %TMP%\package-logger_os_system_startmenu.xml 1>NUL 2>NUL
+    powershell -command Export-StartLayout -UseDesktopApplicationID -Path %TMP%\package-logger_os_system_startmenu.xml 1>NUL 2>NUL
+    echo.
+
+:LOG_OFFICE_APP
+
+    echo - office
+    del %TMP%\package-logger_office_excel.txt 1>NUL 2>NUL
+    del %TMP%\package-logger_office_outlook.txt 1>NUL 2>NUL
+    del %TMP%\package-logger_office_powerpoint.txt 1>NUL 2>NUL
+    del %TMP%\package-logger_office_word.txt 1>NUL 2>NUL
+    call :SUB_OFFICE_APP Excel      *.xlam > %TMP%\package-logger_office_excel.txt
+    call :SUB_OFFICE_APP Outlook           > %TMP%\package-logger_office_outlook.txt
+    call :SUB_OFFICE_APP PowerPoint *.ppam > %TMP%\package-logger_office_powerpoint.txt
+    call :SUB_OFFICE_APP Word              > %TMP%\package-logger_office_word.txt
     echo.
 
 :EXIT
@@ -99,3 +136,15 @@
         pause
         exit /b 1
     )
+
+:SUB_OFFICE_APP
+ 
+    set APP=%1
+    set PAT=%2
+    for /F "tokens=1,2,* delims= " %%a in ('reg query HKCU\SOFTWARE\Microsoft\Office\%APP%\Addins /s /t REG_SZ /v FriendlyName 2^>NUL ^| findstr FriendlyName') do ( echo %%c )
+    for /F "tokens=1,2,* delims= " %%a in ('reg query HKLM\SOFTWARE\Microsoft\Office\%APP%\Addins /s /t REG_SZ /v FriendlyName 2^>NUL ^| findstr FriendlyName') do ( echo %%c )
+    for /F "tokens=1,2,* delims= " %%a in ('reg query HKLM\SOFTWARE\WOW6432Node\Microsoft\Office\%APP%\Addins /s /t REG_SZ /v FriendlyName 2^>NUL^| findstr FriendlyName') do ( echo %%c )
+    if "%PAT%" NEQ "" (
+        for /F %%a in ('dir /B %APPDATA%\Microsoft\AddIns\%EXT%') do ( echo %%a )
+    )
+    exit /b 0

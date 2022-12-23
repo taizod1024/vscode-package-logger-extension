@@ -121,16 +121,18 @@ class PackageLogger {
 
     // log any
     let machine: any = { os: {}, package: {} };
-    await timeoutPromise(() => this.logSysteminfo(machine));
-    await timeoutPromise(() => this.logFeature(machine));
-    await timeoutPromise(() => this.logService(machine));
-    await timeoutPromise(() => this.logEnv(machine));
-    await timeoutPromise(() => this.logApp(machine));
-    await timeoutPromise(() => this.logChocolatey(machine));
-    await timeoutPromise(() => this.logNodejs(machine));
-    await timeoutPromise(() => this.logPython(machine));
-    await timeoutPromise(() => this.logVscode(machine));
-    await timeoutPromise(() => this.logGit(machine));
+    await timeoutPromise(() => this.logOsSystem(machine));
+    await timeoutPromise(() => this.logOsFeature(machine));
+    await timeoutPromise(() => this.logOsService(machine));
+    await timeoutPromise(() => this.logOsEnv(machine));
+    await timeoutPromise(() => this.logOsStartup(machine));
+    await timeoutPromise(() => this.logPkgApp(machine));
+    await timeoutPromise(() => this.logPKgChocolatey(machine));
+    await timeoutPromise(() => this.logPkgNodejs(machine));
+    await timeoutPromise(() => this.logPkgPython(machine));
+    await timeoutPromise(() => this.logPkgVscode(machine));
+    await timeoutPromise(() => this.logPkgGit(machine));
+    await timeoutPromise(() => this.logOfficeApp(machine));
 
     // output log
     this.outputLog(machine);
@@ -138,8 +140,11 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}] - done`);
   }
 
-  /** log systeminfo */
-  public logSysteminfo(machine: any) {
+  /** log os system */
+  public logOsSystem(machine: any) {
+
+    machine.os.system = {};
+
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - systeminfo`);
 
@@ -165,12 +170,11 @@ class PackageLogger {
       if (excludes.some(val => line.startsWith(val))) continue; // exclude dynamic section
       value += line + "\r\n";
     }
-    machine.os.system = {};
     machine.os.system.systeminfo = value;
   }
 
-  /** log env */
-  public logEnv(machine: any) {
+  /** log os env */
+  public logOsEnv(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - environment variables`);
 
@@ -199,13 +203,13 @@ class PackageLogger {
     }
   }
 
-  /** log feature */
-  public logFeature(machine: any) {
+  /** log os feature */
+  public logOsFeature(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - feature`);
     this.channel.appendLine(`[${this.timestamp()}]   $ dism /Online /Get-Features /English`);
 
-    let path = `${process.env.TMP}\\package-logger_feature.txt`;
+    let path = `${process.env.TMP}\\package-logger_os_feature.txt`;
     if (!fs.existsSync(path)) {
       this.channel.appendLine(`[${this.timestamp()}]     => dism failed`);
     } else {
@@ -222,13 +226,13 @@ class PackageLogger {
     }
   }
 
-  /** log service */
-  public logService(machine: any) {
+  /** log os service */
+  public logOsService(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - service`);
     this.channel.appendLine(`[${this.timestamp()}]   $ powershell -command "Get-Service"`);
 
-    let path = `${process.env.TMP}\\package-logger_service.txt`;
+    let path = `${process.env.TMP}\\package-logger_os_service.txt`;
     if (!fs.existsSync(path)) {
       this.channel.appendLine(`[${this.timestamp()}]     => Get-Service failed`);
     } else {
@@ -247,8 +251,36 @@ class PackageLogger {
     }
   }
 
-  /** log app */
-  public logApp(machine: any) {
+  /** log os startup */
+  public logOsStartup(machine: any) {
+    // show channel
+    let command1 = 'dir /b "%APPDATA%MicrosoftWindowsStart MenuProgramsStartup"';
+    let command2 = 'dir /b "%ALLUSERSPROFILE%MicrosoftWindowsStart MenuProgramsStartUp"';
+    this.channel.appendLine(`[${this.timestamp()}] - startup`);
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${command1}`);
+    this.channel.appendLine(`[${this.timestamp()}]   $ ${command2}`);
+
+    let path = `${process.env.TMP}\\package-logger_os_startup.txt`;
+    if (!fs.existsSync(path)) {
+      this.channel.appendLine(`[${this.timestamp()}]     => dir failed`);
+    } else {
+      let text = fs.readFileSync(path).toString().trim();
+      let lines = text
+        .split(/[\r\n]+/)
+        .map(val => val.trim())
+        .filter(val => val);
+      fs.unlinkSync(path);
+      machine.os.startup = {};
+      for (const line of lines) {
+        let words = line.split(/:/);
+        let name = words[0];
+        machine.os.startup[name] = line;
+      }
+    }
+  }
+
+  /** log pkg app */
+  public logPkgApp(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - app`);
 
@@ -300,8 +332,8 @@ class PackageLogger {
     }
   }
 
-  /** log chocolatey */
-  public logChocolatey(machine: any) {
+  /** log pkg chocolatey */
+  public logPKgChocolatey(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - chocolatey`);
 
@@ -343,8 +375,8 @@ class PackageLogger {
     machine.package.chocolatey._choco_config_list = text;
   }
 
-  /** log nodejs */
-  public logNodejs(machine: any) {
+  /** log pkg nodejs */
+  public logPkgNodejs(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - nodejs`);
 
@@ -394,8 +426,8 @@ class PackageLogger {
     }
   }
 
-  /** log python */
-  public logPython(machine: any) {
+  /** log pkg python */
+  public logPkgPython(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - python`);
 
@@ -429,8 +461,8 @@ class PackageLogger {
     machine.package.python._pip_config_list = text;
   }
 
-  /** log vscode */
-  public logVscode(machine: any) {
+  /** log pkg vscode */
+  public logPkgVscode(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - vscode`);
 
@@ -476,8 +508,8 @@ class PackageLogger {
     }
   }
 
-  /** log git */
-  public logGit(machine: any) {
+  /** log pkg git */
+  public logPkgGit(machine: any) {
     // show channel
     this.channel.appendLine(`[${this.timestamp()}] - git`);
 
@@ -491,6 +523,39 @@ class PackageLogger {
       machine.package.git = {};
       machine.package.git._git_config_list = text;
     }
+  }
+
+  /** log office app */
+  public logOfficeApp(machine: any) {
+    machine.office = {};
+    ["excel", "outlook", "powerpoint", "word"].forEach(app => {
+      // show channel
+      let command1 = `reg query HKCU\\SOFTWARE\\Microsoft\\Office\\${app}\\Addins /s /t REG_SZ /v FriendlyName`;
+      let command2 = `reg query HKLM\\SOFTWARE\\Microsoft\\Office\\${app}\\Addins /s /t REG_SZ /v FriendlyName`;
+      let command3 = `reg query HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Office\\${app}\\Addins /s /t REG_SZ /v FriendlyName`;
+      this.channel.appendLine(`[${this.timestamp()}] - office ${app}`);
+      this.channel.appendLine(`[${this.timestamp()}]   $ ${command1}`);
+      this.channel.appendLine(`[${this.timestamp()}]   $ ${command2}`);
+      this.channel.appendLine(`[${this.timestamp()}]   $ ${command3}`);
+
+      let path = `${process.env.TMP}\\package-logger_office_${app}.txt`;
+      if (!fs.existsSync(path)) {
+        this.channel.appendLine(`[${this.timestamp()}]     => reg failed`);
+      } else {
+        let text = fs.readFileSync(path).toString().trim();
+        let lines = text
+          .split(/[\r\n]+/)
+          .map(val => val.trim())
+          .filter(val => val);
+        fs.unlinkSync(path);
+        machine.office[app] = {};
+        for (const line of lines) {
+          let words = line.split(/:/);
+          let name = words[0];
+          machine.office[app][name] = line;
+        }
+      }
+    });
   }
 
   //** output log */
