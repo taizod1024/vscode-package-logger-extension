@@ -142,7 +142,6 @@ class PackageLogger {
 
   /** log os system */
   public logOsSystem(machine: any) {
-
     machine.os.system = {};
 
     // show channel
@@ -254,8 +253,8 @@ class PackageLogger {
   /** log os startup */
   public logOsStartup(machine: any) {
     // show channel
-    let command1 = 'dir /b "%APPDATA%MicrosoftWindowsStart MenuProgramsStartup"';
-    let command2 = 'dir /b "%ALLUSERSPROFILE%MicrosoftWindowsStart MenuProgramsStartUp"';
+    let command1 = 'dir /b "%APPDATA%\Microsoft\Windows\Start MenuProgramsStartup"';
+    let command2 = 'dir /b "%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\StartUp"';
     this.channel.appendLine(`[${this.timestamp()}] - startup`);
     this.channel.appendLine(`[${this.timestamp()}]   $ ${command1}`);
     this.channel.appendLine(`[${this.timestamp()}]   $ ${command2}`);
