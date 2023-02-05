@@ -27,7 +27,7 @@ REM call :UPDATE_PKG_VSCODE
     call :LOG_OS_SERVICE
     call :LOG_OS_STARTUP
     call :LOG_OS_STARTMENU
-    call :LOG_OS_SYSTEM_SYSTEMINFO
+    call :LOG_OS_SYSTEM
     call :LOG_PKG_APP
     call :LOG_PKG_CHOCO
     call :LOG_PKG_GIT
@@ -160,9 +160,9 @@ REM call :UPDATE_PKG_VSCODE
     )
     exit /b 0
 
-:LOG_OS_SYSTEM_SYSTEMINFO
+:LOG_OS_SYSTEM
 
-    echo - logging os/system/systeminfo
+    echo - logging os/system
     systeminfo >> %TMP_DIR%\%TMP_APP%_os_system_systeminfo.txt
     exit /b 0
 
@@ -183,9 +183,9 @@ REM call :UPDATE_PKG_VSCODE
 :LOG_PKG_APP
 
     echo - logging package/app
-    reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall /s             | findstr HKEY_LOCAL_MACHINE >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
-    reg query HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall /s | findstr HKEY_LOCAL_MACHINE >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
-    reg query HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall /s              | findstr HKEY_LOCAL_MACHINE >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
+    reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall /s             | findstr DisplayName >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
+    reg query HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall /s | findstr DisplayName >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
+    reg query HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall /s              | findstr DisplayName >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
     exit /b 0
 
 :LOG_PKG_CHOCO
@@ -196,7 +196,6 @@ REM call :UPDATE_PKG_VSCODE
         echo   =^> choco not found
         exit /b 1
     )
-
     choco list --local-only  >> %TMP_DIR%\%TMP_APP%_pkg_choco.txt
     choco config list >> %TMP_DIR%\%TMP_APP%_pkg_choco_config_list.txt
     exit /b 0
@@ -209,7 +208,6 @@ REM call :UPDATE_PKG_VSCODE
         echo   =^> git not found
         exit /b 1
     )
-
     git config --list >> %TMP_DIR%\%TMP_APP%_pkg_git_config_list.txt
     exit /b 0
 
