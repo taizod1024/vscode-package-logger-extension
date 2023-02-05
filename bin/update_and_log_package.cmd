@@ -169,6 +169,7 @@ REM call :UPDATE_PKG_VSCODE
 :LOG_OS_STARTUP
 
     echo - logging os/startup
+    echo   TODO レジストリから取得
     dir /b "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"         >> %TMP_DIR%\%TMP_APP%_os_startup.txt
     dir /b "%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\StartUp" >> %TMP_DIR%\%TMP_APP%_os_startup.txt
     exit /b 0
@@ -183,6 +184,7 @@ REM call :UPDATE_PKG_VSCODE
 :LOG_PKG_APP
 
     echo - logging package/app
+    echo   TODO 名前のみ抽出
     reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall /s             | findstr DisplayName >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
     reg query HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall /s | findstr DisplayName >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
     reg query HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall /s              | findstr DisplayName >> %TMP_DIR%\%TMP_APP%_pkg_app.txt
