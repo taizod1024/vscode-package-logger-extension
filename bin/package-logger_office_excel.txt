@@ -1,2 +1,0 @@
-Microsoft Power Pivot for Excel 
-ppt-align-grid.ppam 

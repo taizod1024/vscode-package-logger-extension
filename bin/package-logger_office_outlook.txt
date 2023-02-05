@@ -1,3 +1,0 @@
-Microsoft Access Outlook Add-in for Data Collection and Publishing 
-Microsoft SharePoint Server Colleague Import Add-in 
-Microsoft IME Outlook アドイン 
