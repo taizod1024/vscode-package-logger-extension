@@ -4,7 +4,7 @@
   "displayName": "Package Logger",
   "description": "package logger extension for windows",
   "engines": {
-    "vscode": "^1.61.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
@@ -16,9 +16,6 @@
   ],
   "publisher": "taizod1024",
   "main": "./build/main.js",
-  "activationEvents": [
-    "onCommand:package-logger.updateAndLogPackage"
-  ],
   "contributes": {
     "commands": [
       {

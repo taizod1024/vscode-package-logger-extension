@@ -1,10 +1,14 @@
     @echo off
+
+    pause
+
     setlocal enabledelayedexpansion
     chcp 65001
 
     set TMP_APP=package-logger
     set TMP_DIR=%1
     if "%TMP_DIR%" == "" set TMP_DIR=.
+
 
     set CMDNAME=%~nx0
     echo %CMDNAME%:
