@@ -106,9 +106,16 @@ class PackageLogger {
     if (this.computerName === null) {
       throw `ERROR: environment variable COMPUTERNAME missing`;
     }
+
+    // create app path
+    if (!fs.existsSync(this.appPath)) {
+      fs.mkdirSync(this.appPath, { recursive: true });
+    }
+
     this.channel.appendLine(`[${this.timestamp()}] - computername: ${this.computerName}`);
     this.logPath = `${this.appPath}\\${this.computerName}`;
     this.tmpPath = `${process.env.TMP}\\${this.appid}\\${this.computerName}`;
+    this.channel.appendLine(`[${this.timestamp()}] - appPath: ${this.appPath}`);
     this.channel.appendLine(`[${this.timestamp()}] - logPath: ${this.logPath}`);
     this.channel.appendLine(`[${this.timestamp()}] - tmpPath: ${this.tmpPath}`);
 
