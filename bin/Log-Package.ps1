@@ -90,7 +90,7 @@ try {
     # log packages
     # --------------------
 
-    function invoke-scriptat() {
+    function Invoke-ScriptAt() {
         param(
             [Parameter(Mandatory = $true)] [string] $path,
             [Parameter(Mandatory = $true)] [scriptblock] $script
@@ -105,13 +105,13 @@ try {
         }
     }
 
-    function convert-filename($filename) {
+    function normalize-filename($filename) {
         ($filename -replace "[`\/]", "-") -replace "[:`*`?`"<>`|]", ""
     }
     
-    invoke-scriptat "./os/env" {
+    Invoke-ScriptAt "./os/env" {
         Get-ChildItem env: | ForEach-Object {
-            $filename = convert-filename $_.Name
+            $filename = normalize-filename $_.Name
             $text = "$($_.Name)=$($_.Value)"
             if ($_.Name -eq "Path" -or $_.Name -eq "PATHEXT") {
                 # Path,PATHEXTだけは改行して出力
@@ -120,69 +120,76 @@ try {
             $text | Out-File -NoNewline $filename
         }
     }
-    invoke-scriptat "./os/feature" {
+    Invoke-ScriptAt "./os/feature" {
         Get-WindowsOptionalFeature -Online `
         | Where-Object { $_.State -eq "Enabled" } `
         | ForEach-Object {
-            $filename = convert-filename $_.FeatureName
+            $filename = normalize-filename $_.FeatureName
             $text = $_.FeatureName
             $text | Out-File -NoNewline $filename
         }
     }
-    invoke-scriptat "./os/service" {
+    Invoke-ScriptAt "./os/service" {
         Get-Service `
         | Where-Object { -not ($_.ServiceType -match '^[0-9]+$') } `
         | Select-Object -property StartType, Name `
         | ForEach-Object {
-            $filename = convert-filename $_.Name
+            $filename = normalize-filename $_.Name
             $text = "$($_.Name): $($_.StartType)"
             $text | Out-File -NoNewline $filename
         }
     }
-    invoke-scriptat "./os/system" {
+    Invoke-ScriptAt "./os/system" {
         $filename = "systeminfo"
         $text = systeminfo
-        $text | Out-File $filename
+        $text | Out-File -NoNewline $filename
     }
-    invoke-scriptat "./os" {}
-    invoke-scriptat "./package/app" {
+    Invoke-ScriptAt "./os" {}
+    Invoke-ScriptAt "./package/app" {
         (Get-ChildItem Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | Select-Object DisplayName, DisplayVersion) `
             + (Get-ChildItem Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | Select-Object DisplayName, DisplayVersion) `
             + (Get-ChildItem Registry::HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | Select-Object DisplayName, DisplayVersion)`
         | Where-Object { $_.DisplayName } `
         | ForEach-Object {
-            $filename = "$(convert-filename $_.DisplayName)"
+            $filename = normalize-filename $_.DisplayName
             $text = "$($_.DisplayName)@$($_.DisplayVersion)"
             $text | Out-File -NoNewline $filename
         }    
     }
     Get-Command choco | Out-Null
     if ($?) {
-        invoke-scriptat "./package/chocolatey" {
+        Invoke-ScriptAt "./package/chocolatey" {
             choco config list > _choco_config_list
             choco list --local-only `
             | Where-Object { $_ -notmatch "packages installed" }`
             | ForEach-Object {
-                $filename = ($_ -split " ")[0]
+                $filename = normalize-filename ($_ -split " ")[0]
                 $text = $_ -replace " ", "@"
-                $text | Out-File $filename
+                $text | Out-File -NoNewline $filename
             }
         }
     }
     Get-Command git | Out-Null
     if ($?) {
-        invoke-scriptat "./package/git" {
+        Invoke-ScriptAt "./package/git" {
             git config --list > _git_config_list
         }
     }
     Get-Command npm | Out-Null
     if ($?) {
-        invoke-scriptat "./package/nodejs" {
+        Invoke-ScriptAt "./package/nodejs" {
             npm config list > _npm_config_list
             npm list --global `
-            | Where-Object { $_ -notmatch "packages installed" }`
+            | Where-Object { $_ -ne "" }`
+            | Where-Object { $_ -notmatch "->" }`
             | ForEach-Object {
-                // TODO wip
+                $array_1 = $_ -split " "
+                $text = $array_1[1]
+                $array_2 = $text -split "@"
+                $filename = $array_2[0]
+                if (-not $filename) { $filename = "@" + $array_2[1] }
+                $filename = normalize-filename $filename
+                $text | Out-File -NoNewline $filename
             }
             Get-Command nvm | Out-Null
             if ($?) {
@@ -190,14 +197,14 @@ try {
             }
         }
     }
-    invoke-scriptat "./package/python" {}
-    invoke-scriptat "./package/vscode" {}
-    invoke-scriptat "./package" {}
-    invoke-scriptat "./office/excel" {}
-    invoke-scriptat "./office/word" {}
-    invoke-scriptat "./office/powerpoint" {}
-    invoke-scriptat "./office/outlook" {}
-    invoke-scriptat "./office" {}
+    Invoke-ScriptAt "./package/python" {}
+    Invoke-ScriptAt "./package/vscode" {}
+    Invoke-ScriptAt "./package" {}
+    Invoke-ScriptAt "./office/excel" {}
+    Invoke-ScriptAt "./office/word" {}
+    Invoke-ScriptAt "./office/powerpoint" {}
+    Invoke-ScriptAt "./office/outlook" {}
+    Invoke-ScriptAt "./office" {}
     
     # back to directory
     Pop-Location
@@ -210,6 +217,7 @@ try {
     # done
     Write-Host "[$(timestamp)] - done"
     timeout 5
+    pause
 }
 catch {
     Write-Host $_ -ForegroundColor red 
