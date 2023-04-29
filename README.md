@@ -5,47 +5,62 @@ Use it with Git.
 
 - package-logger
   - os
-    - system information  
+    - system information
       ```
-      systeminfo
+      PS> systeminfo
       ```
     - windows features
       ```
-      dism /Online /Get-Features /English
+      PS> Get-WindowsOptionalFeature -Online
       ```
     - windows services
       ```
-      powershell -command "Get-Service"
+      PS> Get-Service
       ```
-    - environment variables
+    - environment variable
+      ```
+      PS> Get-ChildItem env:
+      ```
   - package
-    - windows application list  
+    - windows application list
       ```
-      reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall /s
-      reg query HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall /s
-      reg query HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall /s
+      PS> Get-ChildItem `
+        Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall, `
+        Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall, `
+        Registry::HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall
       ```
     - chocolatey package list and config
       ```
-      choco list --local-only
-      choco config list
-      ```
-    - nodejs package list and config
-      ```
-      npm list --global
-      npm config list
-      nvm list
-      ```
-    - python package list and config
-      ```
-      pip list
-      pip config list
-      ```
-    - vscode extension list  
-      ```
-      code --list-extensions -show-versions
+      PS> choco config list
+      PS> choco list --local-only
       ```
     - git config
       ```
-      git config --list
+      PS> git config --list
+      ```
+    - nodejs package list and config
+      ```
+      PS> npm config list
+      PS> npm list --global
+      PS> nvm list
+      ```
+    - python package list and config
+      ```
+      PS> pip config list
+      PS> pip list
+      ```
+    - vscode extension list
+      ```
+      PS> code --list-extensions -show-versions
+      ```
+  - office
+    - excel addins
+    - word addins
+    - powerpoint addins
+    - outlook addins
+      ```
+      PS> Get-ChildItem `
+        Registry::HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\<OFFICE_APP>\Addins, `
+        Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\<OFFICE_APP>\Addins, `
+        Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\<OFFICE_APP>\Addins
       ```
