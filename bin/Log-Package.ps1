@@ -51,7 +51,7 @@ try {
         Write-Host "[$(timestamp)]   => choco not found"
     }
     else {
-        choco upgrade all
+        choco upgrade all --ignore-checksums
     }
 
     # update nodejs
@@ -116,6 +116,7 @@ try {
             if ($_.Name -eq "Path" -or $_.Name -eq "PATHEXT") {
                 # Path,PATHEXTだけは改行して出力
                 $text = ($text -replace "=", "=`n") -replace ";", "`n"
+                Write-Host "[$(timestamp)]   - $($text)"
             }
             $text | Out-File -Encoding "utf8" -NoNewline $filename
         }
@@ -126,16 +127,18 @@ try {
         | ForEach-Object {
             $filename = Convert-Filename $_.FeatureName
             $text = $_.FeatureName
+            Write-Host "[$(timestamp)]   - $($text)"
             $text | Out-File -Encoding "utf8" -NoNewline $filename
         }
     }
     Invoke-ScriptAt "os/service" {
         Get-Service `
-        | Where-Object { -not ($_.ServiceType -match '^[0-9]+$') } `
+        | Where-Object { $_.ServiceType -notmatch '^[0-9]+$' } `
         | Select-Object -property StartType, Name `
         | ForEach-Object {
             $filename = Convert-Filename $_.Name
             $text = "$($_.Name): $($_.StartType)"
+            Write-Host "[$(timestamp)]   - $($text)"
             $text | Out-File -Encoding "utf8" -NoNewline $filename
         }
     }
@@ -154,6 +157,7 @@ try {
         | ForEach-Object {
             $filename = Convert-Filename $_.DisplayName
             $text = "$($_.DisplayName)@$($_.DisplayVersion)"
+            Write-Host "[$(timestamp)]   - $($text)"
             $text | Out-File -Encoding "utf8" -NoNewline $filename
         }    
     }
@@ -162,10 +166,11 @@ try {
         Invoke-ScriptAt "package/chocolatey" {
             choco config list | Out-File -Encoding "utf8" _choco_config_list
             choco list --local-only `
-            | Where-Object { $_ -notmatch "packages installed" }`
+            | Where-Object { $_ -match "^[^ ]+ +v?[0-9]+(\.[0-9]+)+$" } `
             | ForEach-Object {
                 $filename = Convert-Filename ($_ -split " ")[0]
                 $text = $_ -replace " ", "@"
+                Write-Host "[$(timestamp)]   - $($text)"
                 $text | Out-File -Encoding "utf8" -NoNewline $filename
             }
         }
@@ -190,6 +195,7 @@ try {
                 $filename = $array_2[0]
                 if (-not $filename) { $filename = "@" + $array_2[1] }
                 $filename = Convert-Filename $filename
+                Write-Host "[$(timestamp)]   - $($text)"
                 $text | Out-File -Encoding "utf8" -NoNewline $filename
             }
             Get-Command nvm | Out-Null
@@ -208,6 +214,7 @@ try {
                 $array = $_ -split " +"
                 $filename = Convert-Filename $array[0]
                 $text = $_ -replace " +", "@"
+                Write-Host "[$(timestamp)]   - $($text)"
                 $text | Out-File -Encoding "utf8" -NoNewline $filename
             }
         }
@@ -220,6 +227,7 @@ try {
             $array = $_ -split "@"
             $filename = Convert-Filename $array[0]
             $text = $_
+            Write-Host "[$(timestamp)]   - $($text)"
             $text | Out-File -Encoding "utf8" -NoNewline $filename
         }    
     }
@@ -236,6 +244,7 @@ try {
         | ForEach-Object {
             $filename = Convert-Filename $_.FriendlyName
             $text = $_.FriendlyName
+            Write-Host "[$(timestamp)]   - $($text)"
             $text | Out-File -Encoding "utf8" -NoNewline $filename
         }      
         if ($pattern) {
@@ -243,6 +252,7 @@ try {
             | ForEach-Object {
                 $filename = Convert-Filename $_.Name
                 $text = $_.Name
+                Write-Host "[$(timestamp)]   - $($text)"
                 $text | Out-File -Encoding "utf8" -NoNewline $filename
             }
         }
