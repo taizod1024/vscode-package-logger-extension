@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.15](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.14...v0.3.15) (2023-04-29)
+
+
+### Features
+
+* startup, office addins ([24af494](https://github.com/taizod1024/vscode-package-logger-extension/commit/24af494194f2f4395e69f5b2f2664f67587e3ab7))
+
 ### [0.3.14](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.13...v0.3.14) (2022-12-05)
 
 
