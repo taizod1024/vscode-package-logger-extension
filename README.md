@@ -3,7 +3,24 @@
 Output Windows application, package list with version and config.
 Use it with Git.
 
-- package-logger
+- update
+  - os
+    ```
+    PS> abc-update /a:install /s:wsus /r:n
+    ```
+  - chocolatey
+    ```
+    PS> choco upgrade all --ignore-checksums
+    ```
+  - nodejs
+    ```
+    PS> npm update -g
+    ```
+  - vscode
+    ```
+    PS> code --install-extension <EXTENSION_NAME>
+    ```
+- log
   - os
     - system information
       ```
@@ -60,7 +77,7 @@ Use it with Git.
     - outlook addins
       ```
       PS> Get-ChildItem `
-        Registry::HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\<OFFICE_APP>\Addins, `
-        Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\<OFFICE_APP>\Addins, `
-        Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\<OFFICE_APP>\Addins
+        Registry::HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\<OFFICE_APP_NAME>\Addins, `
+        Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\<OFFICE_APP_NAME>\Addins, `
+        Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\<OFFICE_APP_NAME>\Addins
       ```

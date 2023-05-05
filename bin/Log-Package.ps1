@@ -64,16 +64,6 @@ try {
         npm update -g
     }
 
-    # update python3
-    Write-Host "[$(timestamp)] - update python3"
-    Get-Command python | Out-Null
-    if (-not $?) {
-        Write-Host "[$(timestamp)]   => python not found"
-    }
-    else {
-        python3 -m pip install --upgrade pip
-    }
-
     # update vscode
     Write-Host "[$(timestamp)] - update vscode"
     Get-Command code | Out-Null
