@@ -25,6 +25,8 @@ Use it with Git.
     - system information
       ```
       PS> systeminfo
+      PS> diskpart ...
+      PS> GET-PSDrive ...
       ```
     - windows features
       ```
