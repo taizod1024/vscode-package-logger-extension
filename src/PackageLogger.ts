@@ -44,6 +44,9 @@ class PackageLogger {
   /** tmp path */
   public tmpPath: string;
 
+  /** update flag */
+  public isUpdate: boolean;
+
   /** constructor */
   constructor() {}
 
@@ -60,7 +63,19 @@ class PackageLogger {
         this.extensionPath = context.extensionPath;
         try {
           await this.checkProjectPathAsync();
-          await this.logPackageAsync();
+          await this.logPackageAsync(true);
+        } catch (reason) {
+          packagelogger.channel.appendLine("**** " + reason + " ****");
+        }
+      })
+    );
+    context.subscriptions.push(
+      vscode.commands.registerCommand(`${this.appid}.logPackage`, async () => {
+        this.channel.show();
+        this.extensionPath = context.extensionPath;
+        try {
+          await this.checkProjectPathAsync();
+          await this.logPackageAsync(false);
         } catch (reason) {
           packagelogger.channel.appendLine("**** " + reason + " ****");
         }
@@ -96,7 +111,7 @@ class PackageLogger {
   }
 
   /** log package async */
-  public async logPackageAsync() {
+  public async logPackageAsync(isUpdate: boolean) {
     // show channel
     this.channel.appendLine(`--------`);
     this.channel.appendLine(`[${this.timestamp()}] logPackageAsync:`);
@@ -115,9 +130,11 @@ class PackageLogger {
     this.channel.appendLine(`[${this.timestamp()}] - computername: ${this.computerName}`);
     this.logPath = `${this.appPath}\\${this.computerName}`;
     this.tmpPath = `${process.env.TMP}\\${this.appid}\\${this.computerName}`;
+    this.isUpdate = isUpdate;
     this.channel.appendLine(`[${this.timestamp()}] - appPath: ${this.appPath}`);
     this.channel.appendLine(`[${this.timestamp()}] - logPath: ${this.logPath}`);
     this.channel.appendLine(`[${this.timestamp()}] - tmpPath: ${this.tmpPath}`);
+    this.channel.appendLine(`[${this.timestamp()}] - isUpdate: ${this.isUpdate}`);
 
     // create temporary path
     if (!fs.existsSync(this.tmpPath)) {
@@ -126,7 +143,7 @@ class PackageLogger {
 
     // exec command as administrator
     this.channel.appendLine(`[${this.timestamp()}] - exec command as administrator`);
-    let cmd = `powershell -command start-process 'cmd.exe' -argumentlist '/c','powershell','${this.extensionPath}\\bin\\log-package.ps1','${this.logPath}','${this.tmpPath}' -verb runas -wait`;
+    let cmd = `powershell -command start-process 'cmd.exe' -argumentlist '/c','powershell','${this.extensionPath}\\bin\\log-package.ps1','${this.logPath}','${this.tmpPath}','$${this.isUpdate}' -verb runas -wait`;
     this.channel.appendLine(`[${this.timestamp()}]   $ ${cmd}`);
     this.execCommand(cmd);
 
