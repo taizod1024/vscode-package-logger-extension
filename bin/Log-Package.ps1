@@ -10,9 +10,6 @@ function timestamp() {
 
 try {
 
-    # change codepage 
-    # chcp 65001
-
     # set error action
     $ErrorActionPreference = "SilentlyContinue"
 
