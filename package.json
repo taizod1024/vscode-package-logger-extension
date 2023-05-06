@@ -21,6 +21,10 @@
       {
         "command": "package-logger.updateAndLogPackage",
         "title": "Package Logger: Update and Log Package"
+      },
+      {
+        "command": "package-logger.logPackage",
+        "title": "Package Logger: Log Package"
       }
     ],
     "keybindings": []

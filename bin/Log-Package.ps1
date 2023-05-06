@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)] [string] $logPath,
-    [Parameter(Mandatory = $true)] [string] $tmpPath
+    [Parameter(Mandatory = $true)] [string] $tmpPath,
+    [Parameter(Mandatory = $true)] [boolean] $isUpdate
 )
 
 function timestamp() {
@@ -8,9 +9,6 @@ function timestamp() {
 }
 
 try {
-
-    # change codepage 
-    chcp 65001
 
     # set error action
     $ErrorActionPreference = "SilentlyContinue"
@@ -20,6 +18,7 @@ try {
     Write-Host "[$(timestamp)] $($app_name)"
     Write-Host "[$(timestamp)] - logPath: $($logPath)"
     Write-Host "[$(timestamp)] - tmpPath: $($tmpPath)"
+    Write-Host "[$(timestamp)] - isUpdate: $($isUpdate)"
 
     # clear temporary path
     Write-Host "[$(timestamp)] - remove tmpPath"
@@ -34,45 +33,48 @@ try {
     # update packages
     # --------------------
 
-    # windows update
-    Write-Host "[$(timestamp)] - update os"
-    Get-Command abc-update | Out-Null
-    if (-not $?) {
-        Write-Host "[$(timestamp)]   => abc-update not found"
-    }
-    else {
-        abc-update /a:install /s:wsus /r:n
-    }
+    if ($isUpdate) {
 
-    # update chocolatey
-    Write-Host "[$(timestamp)] - update chocolatey"
-    Get-Command choco | Out-Null
-    if (-not $?) {
-        Write-Host "[$(timestamp)]   => choco not found"
-    }
-    else {
-        choco upgrade all --ignore-checksums
-    }
+        # windows update
+        Write-Host "[$(timestamp)] - update os"
+        Get-Command abc-update | Out-Null
+        if (-not $?) {
+            Write-Host "[$(timestamp)]   => abc-update not found"
+        }
+        else {
+            abc-update /a:install /s:wsus /r:n
+        }
 
-    # update nodejs
-    Write-Host "[$(timestamp)] - update nodejs"
-    Get-Command npm | Out-Null
-    if (-not $?) {
-        Write-Host "[$(timestamp)]   => npm not found"
-    }
-    else {
-        npm update -g
-    }
+        # update chocolatey
+        Write-Host "[$(timestamp)] - update chocolatey"
+        Get-Command choco | Out-Null
+        if (-not $?) {
+            Write-Host "[$(timestamp)]   => choco not found"
+        }
+        else {
+            choco upgrade all --ignore-checksums
+        }
 
-    # update vscode
-    Write-Host "[$(timestamp)] - update vscode"
-    Get-Command code | Out-Null
-    if (-not $?) {
-        Write-Host "[$(timestamp)]   => vscode not found"
-    }
-    else {
-        code --list-extensions | ForEach-Object {
-            code --install-extension $_ --force
+        # update nodejs
+        Write-Host "[$(timestamp)] - update nodejs"
+        Get-Command npm | Out-Null
+        if (-not $?) {
+            Write-Host "[$(timestamp)]   => npm not found"
+        }
+        else {
+            npm update -g
+        }
+
+        # update vscode
+        Write-Host "[$(timestamp)] - update vscode"
+        Get-Command code | Out-Null
+        if (-not $?) {
+            Write-Host "[$(timestamp)]   => vscode not found"
+        }
+        else {
+            code --list-extensions | ForEach-Object {
+                code --install-extension $_ --force
+            }
         }
     }
 
@@ -133,8 +135,23 @@ try {
         }
     }
     Invoke-ScriptAt "os/system" {
+        # systeminfo
         systeminfo | Out-File -Encoding "utf8" systeminfo
-    }
+        # diskpart
+        $scriptpath = "$($env:TMP)\package-logger_diskpart.txt"
+        "list volume`nlist disk" | Out-File -Encoding "utf8" $scriptpath
+        diskpart -s $scriptpath | Out-File -Encoding "utf8" diskpart
+        # drive_list
+        # 参考：https://social.technet.microsoft.com/Forums/windowsserver/ja-JP/71da6de7-4ada-488e-a863-723a601b1483/12487124511247312463203512999223481373271228931354123652348137?forum=winserver10TP
+        Get-PSDrive `
+        | Where-Object { $_.name -match "^[A-Z]$" } `
+        | Format-Table -AutoSize name, `
+        @{ Name = "Size(GB)"; Expression = { (($_.Used + $_.Free) / 1GB).ToString("#,0.00") } }, `
+        @{ Name = "Used(GB)"; Expression = { ($_.Used / 1GB).ToString("#,0.00") } }, `
+        @{ Name = "Free(GB)"; Expression = { ($_.free / 1GB).ToString("#,0.00") } }, `
+        @{ Name = "Use%"; Expression = { "{0:0%}" -f ($_.Used / ($_.Used + $_.Free)) } } `
+        | Out-File -Encoding "utf8" drive_list
+    }    
     Invoke-ScriptAt "os" {}
     Invoke-ScriptAt "package/app" {
         Get-ChildItem `
