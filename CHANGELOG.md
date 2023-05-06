@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.17](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.16...v0.3.17) (2023-05-06)
+
+
+### Features
+
+* diskpart追加 ([c4fed33](https://github.com/taizod1024/vscode-package-logger-extension/commit/c4fed330d3519c03cdca87cb39c9c22b5b94dbbd))
+* drive_list追加 ([6717329](https://github.com/taizod1024/vscode-package-logger-extension/commit/6717329d54c6a59348a742a42e727db71904da87))
+* logPackage追加 ([c156904](https://github.com/taizod1024/vscode-package-logger-extension/commit/c156904d6ac4a60bdb33213604017a13cccc5390))
+
+
+### Bug Fixes
+
+* chcp65001を取りやめ ([f35845f](https://github.com/taizod1024/vscode-package-logger-extension/commit/f35845fb8fb39eb4068d2628fdb2c0f20ceb7760))
+
 ### [0.3.16](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.15...v0.3.16) (2023-05-05)
 
 
