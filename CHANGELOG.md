@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.19](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.18...v0.3.19) (2023-05-07)
+
+
+### Bug Fixes
+
+* pipがない場合のエラーを修正 ([cb447ca](https://github.com/taizod1024/vscode-package-logger-extension/commit/cb447ca9293869dbb5e07745360102ff830a496e))
+
 ### [0.3.18](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.17...v0.3.18) (2023-05-06)
 
 ### [0.3.17](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.16...v0.3.17) (2023-05-06)
