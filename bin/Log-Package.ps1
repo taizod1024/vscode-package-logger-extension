@@ -212,7 +212,7 @@ try {
         }
     }
     Invoke-ScriptAt "package/python" {
-        Get-Command python | Out-Null
+        Get-Command pip | Out-Null
         if ($?) {
             pip config list | Out-File -Encoding "utf8" _pip_config_list
             pip list 2>&1 `
