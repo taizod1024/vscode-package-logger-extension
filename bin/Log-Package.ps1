@@ -278,6 +278,9 @@ try {
     Write-Host "[$(timestamp)] - move tmpPath to logPath"
     if (Test-Path $logPath) { Remove-Item $logPath -Recurse -Force }
     Move-Item $tmpPath $logPath -Force
+    if (!(Test-Path $logPath)) { 
+        throw "ERROR: failed to move tmpPath to logPath."
+    }
 
     # done
     $vscode_process = Get-Process | Where-Object ProcessName -eq code
