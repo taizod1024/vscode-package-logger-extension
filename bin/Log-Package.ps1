@@ -280,11 +280,19 @@ try {
     Move-Item $tmpPath $logPath -Force
 
     # done
-    Write-Host "[$(timestamp)] - done"
-    timeout 5
+    $vscode_process = Get-Process | Where-Object ProcessName -eq code
+    if ($vscode_process.Count -eq 0) {
+        Write-Host "[$(timestamp)] - done. but vscode missing, please start vscode." -ForegroundColor Yellow
+        pause
+    }
+    else {
+        Write-Host "[$(timestamp)] - done"
+        timeout 5
+    }
+
 }
 catch {
-    Write-Host $_ -ForegroundColor red 
+    Write-Host $_ -ForegroundColor Red
     pause
 }
 finally {
