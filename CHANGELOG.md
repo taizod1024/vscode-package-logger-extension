@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.22](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.21...v0.3.22) (2023-05-14)
+
+
+### Bug Fixes
+
+* フォルダ移動失敗時のエラーメッセージ追加 ([abf3d66](https://github.com/taizod1024/vscode-package-logger-extension/commit/abf3d66294a41dd5c06037b8ff216b005c8aca62))
+
 ### [0.3.21](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.20...v0.3.21) (2023-05-14)
 
 
