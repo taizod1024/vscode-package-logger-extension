@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.23](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.22...v0.3.23) (2023-06-05)
+
+
+### Bug Fixes
+
+* [#13](https://github.com/taizod1024/vscode-package-logger-extension/issues/13):choco list --globalがなくなったことへの対応 ([71b9399](https://github.com/taizod1024/vscode-package-logger-extension/commit/71b9399c16de4c2c284cd7b3cbd9e64f938d6c66))
+
 ### [0.3.22](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.21...v0.3.22) (2023-05-14)
 
 
