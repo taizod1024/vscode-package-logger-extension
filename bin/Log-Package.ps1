@@ -172,7 +172,7 @@ try {
     if ($?) {
         Invoke-ScriptAt "package/chocolatey" {
             choco config list | Out-File -Encoding "utf8" _choco_config_list
-            choco list --local-only `
+            choco list `
             | Where-Object { $_ -match "^[^ ]+ +v?[0-9]+(\.[0-9]+)+$" } `
             | ForEach-Object {
                 $filename = Convert-Filename ($_ -split " ")[0]
