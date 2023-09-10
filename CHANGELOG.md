@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.26](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.25...v0.3.26) (2023-09-10)
+
+
+### Bug Fixes
+
+* ドライブ情報ファイル名修正 ([7163bca](https://github.com/taizod1024/vscode-package-logger-extension/commit/7163bca3007f374e9b467d8dececf402acbcb226))
+
 ### [0.3.25](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.24...v0.3.25) (2023-09-10)
 
 ### [0.3.24](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.23...v0.3.24) (2023-09-10)
