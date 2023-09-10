@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.24](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.23...v0.3.24) (2023-09-10)
+
 ### [0.3.23](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.22...v0.3.23) (2023-06-05)
 
 
