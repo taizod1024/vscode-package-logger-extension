@@ -141,7 +141,7 @@ try {
         $scriptpath = "$($env:TMP)\package-logger_diskpart.txt"
         "list volume`nlist disk" | Out-File -Encoding "utf8" $scriptpath
         diskpart -s $scriptpath | Out-File -Encoding "utf8" diskpart
-        # drive_list
+        # drive
         # 参考：https://social.technet.microsoft.com/Forums/windowsserver/ja-JP/71da6de7-4ada-488e-a863-723a601b1483/12487124511247312463203512999223481373271228931354123652348137?forum=winserver10TP
         Get-PSDrive `
         | Where-Object { $_.name -match "^[A-Z]$" } `
@@ -150,7 +150,7 @@ try {
         @{ Name = "Used(GB)"; Expression = { ($_.Used / 1GB).ToString("#,0.00") } }, `
         @{ Name = "Free(GB)"; Expression = { ($_.free / 1GB).ToString("#,0.00") } }, `
         @{ Name = "Use%"; Expression = { "{0:0%}" -f ($_.Used / ($_.Used + $_.Free)) } } `
-        | Out-File -Encoding "utf8" drive_list
+        | Out-File -Encoding "utf8" drive
     }    
     Invoke-ScriptAt "os" {}
     Invoke-ScriptAt "package/app" {
