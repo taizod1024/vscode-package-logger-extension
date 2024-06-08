@@ -16,7 +16,6 @@
   ],
   "publisher": "taizod1024",
   "main": "./build/main.js",
-  "activationEvents": [],
   "contributes": {
     "commands": [
       {
