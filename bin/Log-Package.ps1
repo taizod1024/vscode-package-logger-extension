@@ -286,7 +286,7 @@ try {
   # done
   $vscode_process = Get-Process | Where-Object ProcessName -eq code
   if ($vscode_process.Count -eq 0) {
-    Write-Host -ForegroundColor Green "[$(timestamp)] - done. but vscode missing, please start vscode." -ForegroundColor Yellow
+    Write-Host -ForegroundColor Yellow "[$(timestamp)] - done. but vscode missing, please start vscode."
     pause
   }
   else {
