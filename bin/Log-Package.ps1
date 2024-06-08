@@ -317,12 +317,13 @@ try {
             Copy-Item $env:APPDATA\\Code\\User\\keybindings.json _keybindings.json
             code --list-extensions --show-versions `
             | ForEach-Object {
-                $array = $_ -split "@"
-                $filename = Convert-Filename $array[0]
-                $text = $_
-                Write-Host "[$(Get-DateTime)]   - $($text)"
-                $text | Out-File -Encoding "utf8" -NoNewline $filename
-            }    
+                if ($_ -match "(.*)@(.*)") {
+                    $filename = Convert-Filename $Matches[1]
+                    $text = $_
+                    Write-Host "[$(Get-DateTime)]   - $($text)"
+                    $text | Out-File -Encoding "utf8" -NoNewline $filename
+                }
+            }
         }
 
         # --------------------
