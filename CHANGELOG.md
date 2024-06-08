@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.29](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.28...v0.3.29) (2024-06-08)
+
+
+### Features
+
+* [#17](https://github.com/taizod1024/vscode-package-logger-extension/issues/17):タスクスケジューラ ([28c3fd4](https://github.com/taizod1024/vscode-package-logger-extension/commit/28c3fd4cf97ee2e3c912af6f5d3ed26f70db075e))
+* [#18](https://github.com/taizod1024/vscode-package-logger-extension/issues/18):パフォーマンスログ、スタートアップ追加 ([aaae8d3](https://github.com/taizod1024/vscode-package-logger-extension/commit/aaae8d3b1fe693fd501991b5b540ac8e46dffe89))
+* [#20](https://github.com/taizod1024/vscode-package-logger-extension/issues/20):hosts追加 ([be7eefa](https://github.com/taizod1024/vscode-package-logger-extension/commit/be7eefa1048500f112d9ae109157b7ae22220cb2))
+
+
+### Bug Fixes
+
+* [#16](https://github.com/taizod1024/vscode-package-logger-extension/issues/16):vscodeの分解がうまくいかない ([8557597](https://github.com/taizod1024/vscode-package-logger-extension/commit/8557597a5a53601fce08b8a249a6b7864bfadfe9))
+* close [#19](https://github.com/taizod1024/vscode-package-logger-extension/issues/19):ForegroundColorが重複 ([aa1efda](https://github.com/taizod1024/vscode-package-logger-extension/commit/aa1efda08e0b6e596bcf7f5fee2c6dace613296c))
+
 ### [0.3.28](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.27...v0.3.28) (2024-06-05)
 
 ### [0.3.27](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.26...v0.3.27) (2024-06-02)
