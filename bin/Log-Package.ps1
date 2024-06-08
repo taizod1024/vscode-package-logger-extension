@@ -188,6 +188,8 @@ try {
             @{ Name = "Free(GB)"; Expression = { ($_.free / 1GB).ToString("#,0.00") } }, `
             @{ Name = "Use%"; Expression = { "{0:0%}" -f ($_.Used / ($_.Used + $_.Free)) } } `
             | Out-File -Encoding "utf8" drive
+            # hosts
+            Copy-Item "$($env:WINDIR)\System32\drivers\etc\hosts" "."
         }
 
         Invoke-ScriptAt "os/scheduledtask" {
