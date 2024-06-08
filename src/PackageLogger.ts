@@ -21,7 +21,10 @@ const timeoutPromise = (func: () => void) => {
 /** package-logger-extesnion class */
 class PackageLogger {
   /** application id for vscode */
-  public appid = "package-logger";
+  public appId = "package-logger";
+
+  /** application name */
+  public appName = "Package Logger";
 
   /** channel on vscode */
   public channel: vscode.OutputChannel;
@@ -53,12 +56,12 @@ class PackageLogger {
   /** activate extension */
   public activate(context: vscode.ExtensionContext) {
     // init context
-    this.channel = vscode.window.createOutputChannel(this.appid, { log: true });
-    this.channel.appendLine(`${this.appid} activated`);
+    this.channel = vscode.window.createOutputChannel(this.appName, { log: true });
+    this.channel.appendLine(`${this.appId} activated`);
 
     // init vscode
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.updateAndLogPackage`, async () => {
+      vscode.commands.registerCommand(`${this.appId}.updateAndLogPackage`, async () => {
         this.channel.show();
         this.extensionPath = context.extensionPath;
         try {
@@ -70,7 +73,7 @@ class PackageLogger {
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appid}.logPackage`, async () => {
+      vscode.commands.registerCommand(`${this.appId}.logPackage`, async () => {
         this.channel.show();
         this.extensionPath = context.extensionPath;
         try {
@@ -91,12 +94,12 @@ class PackageLogger {
       throw "ERROR: no root or multi root is not supported";
     }
     this.projectPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    this.appPath = `${this.projectPath}\\${this.appid}`;
+    this.appPath = `${this.projectPath}\\${this.appId}`;
 
     // confirm make folder
     if (!fs.existsSync(this.appPath)) {
-      let plchld = ` ${this.appid} FOLDER NOT FOUND, MAKE ${this.appid} FOLDER ?`;
-      let choice = `YES, MAKE ${this.appid} FOLDER.`;
+      let plchld = ` ${this.appId} FOLDER NOT FOUND, MAKE ${this.appId} FOLDER ?`;
+      let choice = `YES, MAKE ${this.appId} FOLDER.`;
       return vscode.window
         .showQuickPick([choice], {
           placeHolder: plchld,
@@ -129,7 +132,7 @@ class PackageLogger {
 
     this.channel.appendLine(`- computername: ${this.computerName}`);
     this.logPath = `${this.appPath}\\${this.computerName}`;
-    this.tmpPath = `${process.env.TMP}\\${this.appid}\\${this.computerName}`;
+    this.tmpPath = `${process.env.TMP}\\${this.appId}\\${this.computerName}`;
     this.isUpdate = isUpdate;
     this.channel.appendLine(`- appPath: ${this.appPath}`);
     this.channel.appendLine(`- logPath: ${this.logPath}`);
