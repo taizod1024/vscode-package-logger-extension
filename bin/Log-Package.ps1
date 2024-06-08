@@ -202,6 +202,29 @@ try {
             }
         }
 
+        Invoke-ScriptAt "os/startup" {
+            Get-WmiObject Win32_StartupCommand `
+          | ForEach-Object {
+                $filename = Convert-Filename $_.Name
+                $text = "$($filename): $($_.Command)"
+                Write-Host "[$(Get-DateTime)]   - $($text)"
+                $text | Out-File -Encoding "utf8" -NoNewline $filename
+            }
+        }
+
+        Invoke-ScriptAt "os/perflog" {
+            logman query `
+          | Select-Object -Skip 3 `
+          | Select-Object -SkipLast 2 `
+          | ForEach-Object {
+                $fields = $_ -split " {2,}"
+                $filename = Convert-Filename $fields[0]
+                $text = "$($fields[0]): $($fields[1]), $($fields[2])"
+                Write-Host "[$(Get-DateTime)]   - $($text)"
+                $text | Out-File -Encoding "utf8" -NoNewline $filename
+            }
+        }
+
         # --------------------
         # package
         # --------------------
