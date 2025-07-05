@@ -358,7 +358,7 @@ try {
     # success
     Write-Host -ForegroundColor Green "[$(Get-DateTime)] - move tmpPath to logPath"
     if (Test-Path $logPath) { Remove-Item $logPath -Recurse -Force }
-    Move-Item $tmpPath $logPath -Force
+    Move-Item $tmpPath $logPath -Force -ErrorAction Stop
     if (!(Test-Path $logPath)) { 
         throw "ERROR: failed to move tmpPath to logPath."
     }
