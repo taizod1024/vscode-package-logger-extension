@@ -56,6 +56,22 @@ function Get-OfficeApp($appname, $pattern) {
     }
 }
 
+# https://stackoverflow.com/a/39587889
+function Remove-PathToLongDirectory {
+    Param(
+        [string]$directory
+    )
+
+    # create a temporary (empty) directory
+    $parent = [System.IO.Path]::GetTempPath()
+    [string] $name = [System.Guid]::NewGuid()
+    $tempDirectory = New-Item -ItemType Directory -Path (Join-Path $parent $name)
+
+    robocopy /MIR $tempDirectory.FullName $directory | out-null
+    Remove-Item $directory -Force | out-null
+    Remove-Item $tempDirectory -Force | out-null
+}
+
 try {
 
     # output basic information
@@ -67,7 +83,9 @@ try {
 
     # clear temporary path
     Write-Host -ForegroundColor Green "[$(Get-DateTime)] - remove tmpPath"
-    if (Test-Path $tmpPath) { Remove-Item $tmpPath -Recurse -Force }
+    if (Test-Path $tmpPath) { 
+        Remove-PathToLongDirectory $tmpPath
+    }
     Write-Host -ForegroundColor Green "[$(Get-DateTime)] - create tmpPath"
     New-Item $tmpPath -itemtype Directory | Out-Null
 
@@ -358,7 +376,7 @@ try {
     # success
     Write-Host -ForegroundColor Green "[$(Get-DateTime)] - move tmpPath to logPath"
     if (Test-Path $logPath) { 
-        Remove-Item $logPath -Recurse -Force -ErrorAction Stop
+        Remove-PathToLongDirectory $logPath
     }
     Move-Item $tmpPath $logPath -Force -ErrorAction Stop
     if (!(Test-Path $logPath)) { 
