@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.37](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.36...v0.3.37) (2025-07-16)
+
+
+### Bug Fixes
+
+* add activationEvents field to package.json ([aa52263](https://github.com/taizod1024/vscode-package-logger-extension/commit/aa522638f5985aad4bbb8d9b40ba828a0f2442e1))
+
 ### [0.3.36](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.35...v0.3.36) (2025-07-16)
 
 ### [0.3.35](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.34...v0.3.35) (2025-07-16)
