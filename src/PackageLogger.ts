@@ -146,7 +146,7 @@ class PackageLogger {
 
     // exec command as administrator
     this.channel.appendLine(`- exec command as administrator`);
-    let cmd = `powershell -command start-process 'cmd.exe' -argumentlist '/c','powershell','${this.extensionPath}\\bin\\log-package.ps1','${this.logPath}','${this.tmpPath}','$${this.isUpdate}' -verb runas -wait`;
+    let cmd = `powershell -command start-process 'cmd.exe' -argumentlist '/c','powershell','-ExecutionPolicy','RemoteSigned','${this.extensionPath}\\bin\\log-package.ps1','${this.logPath}','${this.tmpPath}','$${this.isUpdate}' -verb runas -wait`;
     this.channel.appendLine(`  $ ${cmd}`);
     this.execCommand(cmd);
 
