@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.35](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.34...v0.3.35) (2025-07-16)
+
+
+### Bug Fixes
+
+* powershell executionpolicy ([16ed0c5](https://github.com/taizod1024/vscode-package-logger-extension/commit/16ed0c5edc80b66b37c6ecab354cc266ffd00596))
+
 ### [0.3.34](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.33...v0.3.34) (2025-07-11)
 
 
