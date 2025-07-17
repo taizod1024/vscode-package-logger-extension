@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.38](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.37...v0.3.38) (2025-07-17)
+
+
+### Bug Fixes
+
+* add -y flag to choco upgrade command for automatic confirmation ([1084e66](https://github.com/taizod1024/vscode-package-logger-extension/commit/1084e66b632c981e4456e6cff9865820cef9b95d))
+
 ### [0.3.37](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.36...v0.3.37) (2025-07-16)
 
 
