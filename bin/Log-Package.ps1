@@ -117,7 +117,7 @@ try {
                 Write-Host "[$(Get-DateTime)]   => choco not found"
             }
             else {
-                choco upgrade all --ignore-checksums
+                choco upgrade all -y --ignore-checksums
             }
 
             # update nodejs
