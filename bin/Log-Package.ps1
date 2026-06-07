@@ -120,6 +120,16 @@ try {
                 choco upgrade all -y --ignore-checksums
             }
 
+            # update winget
+            Write-Host -ForegroundColor Green "[$(Get-DateTime)] - update winget"
+            Get-Command winget | Out-Null
+            if (-not $?) {
+                Write-Host "[$(Get-DateTime)]   => winget not found"
+            }
+            else {
+                winget upgrade --all --accept-package-agreements --accept-source-agreements
+            }
+
             # update nodejs
             Write-Host -ForegroundColor Green "[$(Get-DateTime)] - update nodejs"
             Get-Command npm | Out-Null
