@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.39](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.38...v0.3.39) (2026-06-07)
+
+
+### Bug Fixes
+
+* add winget update command to Log-Package.ps1 for package management ([5386730](https://github.com/taizod1024/vscode-package-logger-extension/commit/5386730854cad0746d6f5846ef0263e3c962dcd0))
+
 ### [0.3.38](https://github.com/taizod1024/vscode-package-logger-extension/compare/v0.3.37...v0.3.38) (2025-07-17)
 
 
